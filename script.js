@@ -46,9 +46,11 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn("No active user set. Using default settings.");
         // currentGameUsername and currentDifficultySetting will retain their default 'Player' and 'medium'
     }
-    // Game does not start automatically. User clicks "New Game".
 
-    // Event listener for the New Game button
+    // Automatically start the game now that settings are loaded.
+    setupNewGame();
+
+    // Event listener for the New Game button (still useful for starting another new game)
     if (newGameBtn) {
         newGameBtn.addEventListener('click', setupNewGame);
     }
