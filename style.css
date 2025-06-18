@@ -18,7 +18,7 @@ body {
     grid-template-columns: repeat(9, 40px);
     grid-template-rows: repeat(9, 40px);
     border: 3px solid #333;
-    margin-bottom: 20px;
+    margin-bottom: 15px; /* Reduced margin-bottom */
 }
 
 /* Cell Styling */
@@ -78,21 +78,22 @@ body {
 /* Timer Styling */
 #timer {
     display: none; /* Initially hidden, JS will set to 'block' or appropriate */
-    font-size: 2em;
-    margin-bottom: 20px;
+    font-size: 1.8em; /* Reduced font-size */
+    margin-bottom: 15px; /* Reduced margin-bottom */
     color: #333;
+    /* margin-top is handled in a later rule, will be set to 5px */
 }
 
 /* New Game Button Styling */
 #new-game-btn {
-    padding: 10px 22px; /* Adjusted padding */
-    font-size: 1em; /* Updated font-size */
+    padding: 8px 18px; /* Reduced padding */
+    font-size: 0.9em; /* Reduced font-size */
     color: #fff; /* White text */
     background-color: #28a745; /* Professional green */
     border: none; /* Ensure no border */
     border-radius: 6px; /* Adjusted border-radius */
     cursor: pointer;
-    margin-bottom: 20px;
+    margin-bottom: 15px; /* Reduced margin-bottom */
     box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle box-shadow */
     transition: background-color 0.2s ease-in-out, transform 0.1s ease, box-shadow 0.2s ease; /* Smooth transitions */
 }
@@ -122,10 +123,10 @@ body {
     color: #721c24; /* Clear red text */
     background-color: #f8d7da; /* Light red background */
     border: 1px solid #f5c6cb; /* Red border */
-    padding: 10px 15px; /* Padding */
+    padding: 8px 12px; /* Reduced padding */
     border-radius: 6px; /* Consistent border-radius */
-    margin-top: 15px; /* Margin top */
-    margin-bottom: 15px; /* Margin bottom */
+    margin-top: 10px; /* Reduced margin top */
+    margin-bottom: 10px; /* Reduced margin bottom */
     /* font-weight: bold; Removed for cleaner callout style, emphasis from bg/border */
 }
 
@@ -133,17 +134,17 @@ body {
     color: #155724; /* Clear green text */
     background-color: #d4edda; /* Light green background */
     border: 1px solid #c3e6cb; /* Green border */
-    padding: 10px 15px; /* Padding */
+    padding: 8px 12px; /* Reduced padding */
     border-radius: 6px; /* Consistent border-radius */
-    margin-top: 15px; /* Margin top */
-    margin-bottom: 15px; /* Margin bottom */
+    margin-top: 10px; /* Reduced margin top */
+    margin-bottom: 10px; /* Reduced margin bottom */
     /* font-weight: bold; Removed for cleaner callout style, emphasis from bg/border */
 }
 
 /* Difficulty Controls Styling */
 #difficulty-controls {
-    margin-top: 15px;
-    margin-bottom: 20px;
+    margin-top: 10px; /* Reduced margin-top */
+    margin-bottom: 15px; /* Reduced margin-bottom */
     text-align: center;
     padding: 10px;
     /* border: 1px solid #ddd; */ /* Optional: if a visual grouping is desired */
@@ -151,15 +152,15 @@ body {
 }
 
 #difficulty-controls h3 {
-    margin: 0 0 12px 0; /* Consistent margin-bottom */
-    font-size: 1.1em;
+    margin: 0 0 10px 0; /* Reduced margin-bottom */
+    font-size: 1em; /* Reduced font-size */
     color: #34495e; /* Consistent color */
     font-weight: 600; /* Consistent font-weight */
 }
 
 #difficulty-controls label {
-    margin-right: 15px; /* Ensured */
-    font-size: 1em;
+    margin-right: 10px; /* Reduced margin-right */
+    font-size: 1em; /* Maintained font-size for readability */
     color: #333;
     cursor: pointer; /* Ensured */
 }
@@ -171,13 +172,13 @@ body {
 
 /* Style radio buttons themselves - minor adjustments if needed */
 #difficulty-controls input[type="radio"] {
-    margin-right: 5px; /* Ensured */
+    margin-right: 3px; /* Reduced margin-right */
     vertical-align: middle; /* Ensured */
 }
 
 /* Styles for input fields that can be shared */
 .shared-input-style {
-    padding: 10px 12px; /* Adjusted padding */
+    padding: 8px 10px; /* Reduced padding */
     border: 1px solid #ced4da; /* Consistent professional border */
     border-radius: 6px; /* Consistent border-radius */
     font-size: 1em;
@@ -202,7 +203,7 @@ body {
 #welcome-container {
     max-width: 500px;
     margin: 40px auto; /* More margin for a dedicated page */
-    padding: 30px;
+    padding: 20px; /* Reduced padding */
     background-color: #ffffff; /* White background for the container - appropriate */
     border-radius: 8px; /* Consistent with other elements or suitable for container */
     box-shadow: 0 6px 18px rgba(0,0,0,0.07); /* Refined, more subtle shadow */
@@ -210,15 +211,15 @@ body {
 }
 
 #welcome-container h1 {
-    font-size: 2.5em; /* Adjusted font size */
+    font-size: 2.2em; /* Reduced font size */
     color: #343a40; /* Softer dark color */
-    margin-bottom: 30px; /* Adjusted margin-bottom */
+    margin-bottom: 25px; /* Maintained margin-bottom */
 }
 
 #player-info-welcome,
 #difficulty-controls-welcome,
 #stats-display {
-    margin-bottom: 30px; /* More spacing between sections */
+    margin-bottom: 20px; /* Reduced spacing between sections */
 }
 
 #player-info-welcome label,
@@ -226,13 +227,14 @@ body {
 #difficulty-controls-welcome label,
 #stats-display,
 #stats-display p { /* Ensure p inside stats-display also gets styled if needed */
-    font-size: 1.1em;
+    font-size: 1em; /* Reduced font-size */
     color: #34495e; /* Consistent text color for welcome page sections */
-    line-height: 1.6;
+    line-height: 1.6; /* Maintained line-height for readability */
 }
 
 #difficulty-controls-welcome h3 {
-    margin-bottom: 12px; /* Space below "Select Difficulty:" */
+    /* font-size is now 1em from the rule above */
+    margin-bottom: 10px; /* Reduced space below "Select Difficulty:" */
     font-weight: 600; /* Slightly bolder */
 }
 
@@ -244,7 +246,7 @@ body {
 #user-select-dropdown,
 #new-username-input {
     /* Inherits from .shared-input-style for padding, border, font-size, focus */
-    margin-bottom: 15px; /* Increased space below each element */
+    margin-bottom: 10px; /* Reduced space below each element */
     width: 90%;
     max-width: 350px;
     display: block;
@@ -257,7 +259,7 @@ body {
 /* Assuming .shared-input-style is applied, these specific rules can be reduced or removed if redundant. */
 #user-select-dropdown,
 #new-username-input {
-    padding: 10px 12px; /* Updated padding */
+    padding: 8px 10px; /* Reduced padding */
     border: 1px solid #ced4da; /* Consistent professional border */
     border-radius: 6px; /* Updated border-radius */
     font-size: 1em;
@@ -276,8 +278,8 @@ body {
 #player-info-welcome > label[for="user-select-dropdown"],
 #new-user-section > label[for="new-username-input"] {
     display: block; /* Make label take its own line */
-    margin-bottom: 6px; /* Adjusted space between label and its control */
-    font-size: 1.0em;
+    margin-bottom: 4px; /* Reduced space between label and its control */
+    font-size: 0.9em; /* Reduced font-size */
     font-weight: normal; /* Standardized font-weight */
     color: #34495e;
     text-align: left;
@@ -291,15 +293,15 @@ body {
 /* Container for the "Or Add New User" section */
 #new-user-section {
     /* Inline styles were: style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee;" */
-    margin-top: 20px; /* Increased from inline */
-    padding-top: 15px; /* Increased from inline */
+    margin-top: 15px; /* Reduced from inline */
+    padding-top: 10px; /* Reduced from inline */
     border-top: 1px solid #e0e0e0; /* Slightly darker border */
-    margin-bottom: 15px; /* Space below this section */
+    margin-bottom: 10px; /* Reduced space below this section */
 }
 
 
 #difficulty-controls-welcome label {
-    margin-right: 15px; /* Adjusted space for radio options */
+    margin-right: 10px; /* Reduced space for radio options */
     cursor: pointer; /* Indicate they are clickable */
     /* font-size and color are inherited from a broader rule:
        #player-info-welcome label, #difficulty-controls-welcome h3, #difficulty-controls-welcome label ...
@@ -311,7 +313,7 @@ body {
     margin-right: 0;
 }
 #difficulty-controls-welcome input[type="radio"] {
-    margin-right: 5px; /* Adjusted space between radio and its text */
+    margin-right: 3px; /* Reduced space between radio and its text */
     vertical-align: middle; /* Ensure alignment */
 }
 
@@ -319,13 +321,13 @@ body {
 #games-completed-display {
     font-weight: bold;
     color: #16a085; /* A vibrant color for the stat */
-    font-size: 1.2em; /* Make stat number slightly larger */
+    font-size: 1.1em; /* Reduced font size */
 }
 
 #start-game-btn {
     display: inline-block;
-    padding: 12px 28px; /* Updated padding */
-    font-size: 1.1em; /* Updated font-size */
+    padding: 10px 20px; /* Reduced padding */
+    font-size: 1em; /* Reduced font-size */
     color: #fff; /* White text */
     background-color: #007bff; /* Professional blue */
     border: none; /* Ensure no border */
@@ -349,14 +351,14 @@ body {
 /* Game Page Adjustments */
 #back-to-settings-link {
     display: inline-block; /* Or block if it should take full width */
-    margin-top: 10px; /* Adjusted from 15px to be slightly closer if body has padding */
-    margin-bottom: 15px; /* Space before timer/board */
-    padding: 10px 18px;
+    margin-top: 5px; /* Reduced margin-top */
+    margin-bottom: 10px; /* Reduced margin-bottom */
+    padding: 8px 15px; /* Reduced padding */
     background-color: #e9ecef; /* Lighter gray, more subtle */
     color: #495057; /* Darker text for better contrast */
     text-decoration: none;
     border-radius: 6px; /* Consistent border-radius */
-    font-size: 1em; /* Slightly larger for better clickability */
+    font-size: 0.9em; /* Reduced font-size */
     border: 1px solid #ced4da; /* Subtle border */
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -371,7 +373,7 @@ body {
    This should naturally keep things centered.
    If #timer or #game-board need specific top margin: */
 #timer {
-    margin-top: 10px; /* Add some top margin if it feels too close to the link/top */
+    margin-top: 5px; /* Reduced top margin */
 }
 
 /* Ensuring the main game area doesn't shift too much.
