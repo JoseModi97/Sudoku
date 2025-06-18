@@ -5,15 +5,17 @@ let timerInterval;
 let elapsedTimeInSeconds = 0; // For the elapsed timer
 
 // Global Variables (continued)
-let currentDifficulty = 'medium'; // Can be updated by getSelectedDifficulty
+// let currentDifficulty = 'medium'; // This will be replaced by currentDifficultySetting
+let currentGameUsername = 'Player'; // Default username
+let currentDifficultySetting = 'medium'; // Default difficulty
+
 
 // DOM Element References
 let timerDisplayElement; // For the timer display itself
 let gameBoardElement;    // For the game board container
 let newGameBtn;
 let messageArea;
-let usernameInput;       // For the username input field
-// cellInputs array is not strictly needed if we query cells by ID or use event.target
+// let usernameInput; // Removed, no longer on game.html
 
 document.addEventListener('DOMContentLoaded', () => {
     // Assign DOM elements once the DOM is ready
@@ -21,19 +23,26 @@ document.addEventListener('DOMContentLoaded', () => {
     gameBoardElement = document.getElementById('game-board');
     newGameBtn = document.getElementById('new-game-btn');
     messageArea = document.getElementById('message-area');
-    usernameInput = document.getElementById('username-input');
+    // usernameInput = document.getElementById('username-input'); // Removed
 
     if (!timerDisplayElement) console.error("Timer display element not found!");
     if (!gameBoardElement) console.error("Game board element not found!");
     if (!newGameBtn) console.error("New Game button not found!");
     if (!messageArea) console.error("Message area element not found!");
-    if (!usernameInput) console.error("Username input element not found!");
+    // if (!usernameInput) console.error("Username input element not found!"); // Removed
 
-    // Load username from cookie
-    const savedUsername = getCookie('sudokuUsername');
-    if (savedUsername && usernameInput) {
-        usernameInput.value = savedUsername;
+    // Load username from localStorage
+    const localUsername = localStorage.getItem('sudokuUsername');
+    if (localUsername) {
+        currentGameUsername = localUsername;
     }
+
+    // Load difficulty from localStorage
+    const localDifficulty = localStorage.getItem('sudokuDifficulty');
+    if (localDifficulty) {
+        currentDifficultySetting = localDifficulty;
+    }
+    // Note: Game does not start automatically. User clicks "New Game".
 
     // Event listener for the New Game button
     if (newGameBtn) {
@@ -62,45 +71,37 @@ function getCellElement(row, col) {
 }
 
 function setupNewGame() {
-    // Save username if entered
-    if (usernameInput) {
-        const currentUsername = usernameInput.value.trim();
-        if (currentUsername) { // Only save if not empty
-            setCookie('sudokuUsername', currentUsername, 30); // Save for 30 days
-        }
-        // Optional: To delete cookie if username is cleared
-        // else { setCookie('sudokuUsername', '', -1); }
-    }
+    // Username and difficulty are now loaded from localStorage via global vars.
+    // No need to save username here (done on welcome page).
+    // No need to read difficulty from radio buttons here.
 
     // clearInterval(timerInterval); // startTimer will handle this
-    // timeRemaining = 300; // Reset to 5 minutes -> No longer needed for elapsed timer
 
     // Ensure board and timer are visible before starting everything
     if (gameBoardElement) {
         gameBoardElement.style.display = 'grid';
     } else {
         console.error("Game board element reference is missing in setupNewGame.");
-        // Fallback query if not initialized, though it should be
         const gb = document.getElementById('game-board');
         if (gb) gb.style.display = 'grid';
     }
 
     if (timerDisplayElement) {
-        timerDisplayElement.style.display = 'block'; // Or appropriate (e.g., 'flex' if it's a flex container)
+        timerDisplayElement.style.display = 'block';
     } else {
         console.error("Timer display element reference is missing in setupNewGame.");
         const td = document.getElementById('timer');
         if (td) td.style.display = 'block';
     }
 
-    // updateTimerDisplay(); // startTimer will call this after resetting time
-    currentDifficulty = getSelectedDifficulty(); // Update difficulty setting
-    const puzzleAndSolution = generateSudokuPuzzle(); // Uses currentDifficulty
+    // currentDifficulty = getSelectedDifficulty(); // Removed: Use currentDifficultySetting
+    const puzzleAndSolution = generateSudokuPuzzle(); // Uses currentDifficultySetting
     board = puzzleAndSolution.puzzle;
     solution = puzzleAndSolution.solution;
 
     renderBoard();
-    clearMessage();
+    // Display a welcome/info message with current settings
+    displayMessage(`Playing as: ${currentGameUsername} | Difficulty: ${currentDifficultySetting}. Good luck!`, "info");
     startTimer();
     enableAllCells(); // Make sure cells are enabled for a new game
 }
@@ -160,13 +161,13 @@ function generateSudokuPuzzle() {
     // Create puzzle by removing cells (e.g., 40 cells for medium)
     // This is a simple removal strategy. For ideal puzzles, uniqueness should be checked.
     // Create puzzle by removing cells based on difficulty
-    const difficulty = getSelectedDifficulty();
+    // const difficulty = getSelectedDifficulty(); // Removed
     let cellsToActuallyRemove;
-    if (difficulty === 'easy') {
+    if (currentDifficultySetting === 'easy') {
         cellsToActuallyRemove = 30; // Fewer cells removed for easy
-    } else if (difficulty === 'hard') {
+    } else if (currentDifficultySetting === 'hard') {
         cellsToActuallyRemove = 50; // More cells removed for hard
-    } else { // Medium or default
+    } else { // Medium or default (medium)
         cellsToActuallyRemove = 40;
     }
 
@@ -185,15 +186,15 @@ function generateSudokuPuzzle() {
         attempts++;
     }
     // For development: Log how many cells were actually removed
-    // console.log(`Difficulty: ${currentDifficulty}, Target remove: ${cellsToActuallyRemove}, Actually removed: ${removedCount}`);
+    // console.log(`Difficulty: ${currentDifficultySetting}, Target remove: ${cellsToActuallyRemove}, Actually removed: ${removedCount}`);
 
     return { puzzle: puzzle, solution: solvedBoard };
 }
 
-function getSelectedDifficulty() {
-    const checkedRadio = document.querySelector('input[name="difficulty"]:checked');
-    return checkedRadio ? checkedRadio.value : 'medium'; // Default to medium
-}
+// function getSelectedDifficulty() { // REMOVED
+//     const checkedRadio = document.querySelector('input[name="difficulty"]:checked');
+//     return checkedRadio ? checkedRadio.value : 'medium'; // Default to medium
+// }
 
 function generateFullSolution() {
     let grid = Array(9).fill(null).map(() => Array(9).fill(0));
@@ -283,27 +284,7 @@ function updateTimerDisplay() {
     }
 }
 
-// Cookie Helper Functions
-function setCookie(name, value, days) {
-    let expires = "";
-    if (days) {
-        const date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        expires = "; expires=" + date.toUTCString();
-    }
-    document.cookie = name + "=" + (value || "")  + expires + "; path=/; SameSite=Lax";
-}
-
-function getCookie(name) {
-    const nameEQ = name + "=";
-    const ca = document.cookie.split(';');
-    for(let i = 0; i < ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-    }
-    return null;
-}
+// Cookie Helper Functions (setCookie, getCookie) are REMOVED.
 
 function checkWinCondition() {
     for (let r = 0; r < 9; r++) {
@@ -317,12 +298,18 @@ function checkWinCondition() {
     if (timerInterval) {
         clearInterval(timerInterval);
     }
+
+    // Increment gamesCompleted in localStorage
+    let gamesCompleted = parseInt(localStorage.getItem('gamesCompleted') || '0');
+    gamesCompleted++;
+    localStorage.setItem('gamesCompleted', gamesCompleted.toString());
+
     // Prepare time string for message from elapsedTimeInSeconds
     const minutes = Math.floor(elapsedTimeInSeconds / 60);
     const seconds = elapsedTimeInSeconds % 60;
     const timeString = (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
 
-    displayMessage(`Congratulations! You solved it in ${timeString}!`, "success");
+    displayMessage(`Congratulations, ${currentGameUsername}! You solved it in ${timeString} on ${currentDifficultySetting} difficulty!`, "success");
     disableAllCells();
     return true; // All cells filled correctly
 }
