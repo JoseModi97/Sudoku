@@ -4,35 +4,48 @@ let solution = []; // 9x9 array for the solved puzzle
 let timerInterval;
 let timeRemaining = 300; // 5 minutes in seconds
 
+// Global Variables (continued)
+let currentDifficulty = 'medium'; // Can be updated by getSelectedDifficulty
+
 // DOM Element References
-let timerDisplay;
-let gameBoardElement;
+let timerDisplayElement; // For the timer display itself
+let gameBoardElement;    // For the game board container
 let newGameBtn;
 let messageArea;
-let cellInputs = []; // Will store references to all 81 input cells
+// cellInputs array is not strictly needed if we query cells by ID or use event.target
 
 document.addEventListener('DOMContentLoaded', () => {
-    timerDisplay = document.getElementById('timer');
+    // Assign DOM elements once the DOM is ready
+    timerDisplayElement = document.getElementById('timer');
     gameBoardElement = document.getElementById('game-board');
     newGameBtn = document.getElementById('new-game-btn');
     messageArea = document.getElementById('message-area');
 
-    // Get cell input references (assuming they are already in the HTML)
-    // This might be better done during renderBoard if cells are dynamically created
+    if (!timerDisplayElement) console.error("Timer display element not found!");
+    if (!gameBoardElement) console.error("Game board element not found!");
+    if (!newGameBtn) console.error("New Game button not found!");
+    if (!messageArea) console.error("Message area element not found!");
+
+    // Event listener for the New Game button
+    if (newGameBtn) {
+        newGameBtn.addEventListener('click', setupNewGame);
+    }
+
+    // Add event listeners to cells (they exist in DOM, just hidden)
     for (let r = 0; r < 9; r++) {
         for (let c = 0; c < 9; c++) {
-            const cell = getCellElement(r, c);
-            if (cell) { // Ensure cell exists
-                cellInputs.push(cell);
+            const cell = getCellElement(r, c); // getCellElement uses document.getElementById
+            if (cell) {
                 cell.addEventListener('input', handleInput);
             } else {
-                console.error(`Cell element cell-${r}-${c} not found.`);
+                // This console error might be too noisy if cells are dynamically added/removed
+                // For now, assuming they are always there as per index.html structure
+                // console.error(`Cell element cell-${r}-${c} not found during initial setup.`);
             }
         }
     }
-
-    newGameBtn.addEventListener('click', setupNewGame);
-    setupNewGame();
+    // DO NOT call setupNewGame() here automatically on page load.
+    // Game starts only when "New Game" button is clicked.
 });
 
 function getCellElement(row, col) {
@@ -42,9 +55,29 @@ function getCellElement(row, col) {
 function setupNewGame() {
     clearInterval(timerInterval);
     timeRemaining = 300; // Reset to 5 minutes
-    updateTimerDisplay(); // Show initial time
 
-    const puzzleAndSolution = generateSudokuPuzzle();
+    // Ensure board and timer are visible before starting everything
+    if (gameBoardElement) {
+        gameBoardElement.style.display = 'grid';
+    } else {
+        console.error("Game board element reference is missing in setupNewGame.");
+        // Fallback query if not initialized, though it should be
+        const gb = document.getElementById('game-board');
+        if (gb) gb.style.display = 'grid';
+    }
+
+    if (timerDisplayElement) {
+        timerDisplayElement.style.display = 'block'; // Or appropriate (e.g., 'flex' if it's a flex container)
+    } else {
+        console.error("Timer display element reference is missing in setupNewGame.");
+        const td = document.getElementById('timer');
+        if (td) td.style.display = 'block';
+    }
+
+    updateTimerDisplay(); // Update display now that it's visible
+
+    currentDifficulty = getSelectedDifficulty(); // Update difficulty setting
+    const puzzleAndSolution = generateSudokuPuzzle(); // Uses currentDifficulty
     board = puzzleAndSolution.puzzle;
     solution = puzzleAndSolution.solution;
 
@@ -138,7 +171,7 @@ function generateSudokuPuzzle() {
         attempts++;
     }
     // For development: Log how many cells were actually removed
-    // console.log(`Difficulty: ${difficulty}, Target remove: ${cellsToActuallyRemove}, Actually removed: ${removedCount}`);
+    // console.log(`Difficulty: ${currentDifficulty}, Target remove: ${cellsToActuallyRemove}, Actually removed: ${removedCount}`);
 
     return { puzzle: puzzle, solution: solvedBoard };
 }
@@ -224,7 +257,11 @@ function decrementTimer() {
 function updateTimerDisplay() {
     const minutes = Math.floor(timeRemaining / 60);
     const seconds = timeRemaining % 60;
-    timerDisplay.textContent = `Time: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    if (timerDisplayElement) { // Check if the element exists
+        timerDisplayElement.textContent = `Time: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    } else {
+        // console.error("Timer display element not found for updating display.");
+    }
 }
 
 function checkWinCondition() {
@@ -254,7 +291,9 @@ function clearMessage() {
 }
 
 function disableAllCells() {
-    cellInputs.forEach(cell => {
+    // Query all relevant input cells directly if cellInputs array is not maintained
+    const cells = document.querySelectorAll('#game-board input');
+    cells.forEach(cell => {
         cell.setAttribute('readonly', true);
     });
 }
