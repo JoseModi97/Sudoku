@@ -209,21 +209,60 @@ body {
     font-weight: 600; /* Slightly bolder */
 }
 
-#username-input-welcome {
-    /*padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1em;
-    box-sizing: border-box; */ /* Replaced by class */
+/* Styles for old #username-input-welcome - This ID is no longer used. */
+/* #username-input-welcome { ... } */
+/* #username-input-welcome:focus { ... } */
+
+/* Styling for the new user selection dropdown and new user text input */
+#user-select-dropdown,
+#new-username-input {
+    /* Inherits from .shared-input-style for padding, border, font-size, focus */
+    margin-bottom: 15px; /* Increased space below each element */
     width: 90%;
     max-width: 350px;
-    margin-top: 8px;
-    display: inline-block; /* To allow max-width and centering if text-align:center on parent */
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
-/* #username-input-welcome:focus {
-    border-color: #007bff;
+/* Explicitly apply shared styles here if not done via class in HTML, or for clarity */
+#user-select-dropdown,
+#new-username-input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px; /* Consistent with .shared-input-style */
+    font-size: 1em;
+    box-sizing: border-box;
+}
+#user-select-dropdown:focus,
+#new-username-input:focus {
+    border-color: #007bff; /* Consistent with .shared-input-style:focus */
     outline: none;
-} */ /* Replaced by class */
+}
+
+
+/* Labels for the new dropdown and input field */
+#player-info-welcome > label[for="user-select-dropdown"],
+#new-user-section > label[for="new-username-input"] {
+    display: block; /* Make label take its own line */
+    margin-bottom: 8px; /* Space between label and its control */
+    font-size: 1.0em; /* Adjusted from 1.1em for a cleaner look if too large */
+    color: #34495e; /* Match other labels in this section */
+    text-align: left; /* Align text to the left, above the centered input */
+    width: 90%; /* Match width of inputs for alignment */
+    max-width: 350px; /* Match width of inputs for alignment */
+    margin-left: auto; /* Center the label block itself */
+    margin-right: auto; /* Center the label block itself */
+    padding-left: 2px; /* Slight padding if inputs have internal padding affecting text start */
+}
+
+/* Container for the "Or Add New User" section */
+#new-user-section {
+    /* Inline styles were: style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee;" */
+    margin-top: 20px; /* Increased from inline */
+    padding-top: 15px; /* Increased from inline */
+    border-top: 1px solid #e0e0e0; /* Slightly darker border */
+    margin-bottom: 15px; /* Space below this section */
+}
 
 
 #difficulty-controls-welcome label {

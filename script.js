@@ -5,44 +5,48 @@ let timerInterval;
 let elapsedTimeInSeconds = 0; // For the elapsed timer
 
 // Global Variables (continued)
-// let currentDifficulty = 'medium'; // This will be replaced by currentDifficultySetting
-let currentGameUsername = 'Player'; // Default username
-let currentDifficultySetting = 'medium'; // Default difficulty
-
+let currentGameUsername = 'Player'; // Default username, will be updated from localStorage
+let currentDifficultySetting = 'medium'; // Default difficulty, will be updated
 
 // DOM Element References
-let timerDisplayElement; // For the timer display itself
-let gameBoardElement;    // For the game board container
+let timerDisplayElement;
+let gameBoardElement;
 let newGameBtn;
 let messageArea;
-// let usernameInput; // Removed, no longer on game.html
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Assign DOM elements once the DOM is ready
     timerDisplayElement = document.getElementById('timer');
     gameBoardElement = document.getElementById('game-board');
     newGameBtn = document.getElementById('new-game-btn');
     messageArea = document.getElementById('message-area');
-    // usernameInput = document.getElementById('username-input'); // Removed
 
     if (!timerDisplayElement) console.error("Timer display element not found!");
     if (!gameBoardElement) console.error("Game board element not found!");
     if (!newGameBtn) console.error("New Game button not found!");
     if (!messageArea) console.error("Message area element not found!");
-    // if (!usernameInput) console.error("Username input element not found!"); // Removed
 
-    // Load username from localStorage
-    const localUsername = localStorage.getItem('sudokuUsername');
-    if (localUsername) {
-        currentGameUsername = localUsername;
-    }
+    // Load active user and their settings
+    const activeUsername = localStorage.getItem('activeUsername');
+    const allUsersJSON = localStorage.getItem('sudokuUsers');
+    const allUsers = allUsersJSON ? JSON.parse(allUsersJSON) : [];
 
-    // Load difficulty from localStorage
-    const localDifficulty = localStorage.getItem('sudokuDifficulty');
-    if (localDifficulty) {
-        currentDifficultySetting = localDifficulty;
+    const activeUserObject = activeUsername ? allUsers.find(user => user.name === activeUsername) : null;
+
+    if (activeUserObject) {
+        currentGameUsername = activeUserObject.name;
+        currentDifficultySetting = activeUserObject.lastDifficulty || 'medium'; // Use stored difficulty or default
+    } else if (activeUsername) {
+        // User was set, but not found in the user array (edge case, or if users array is cleared)
+        console.warn(`Active user '${activeUsername}' not found in user data. Using default settings or last known general difficulty.`);
+        currentGameUsername = activeUsername; // Still use the name if available
+        // Fallback to the general difficulty setting if specific user data is missing
+        currentDifficultySetting = localStorage.getItem('sudokuDifficulty') || 'medium';
+    } else {
+        // No activeUsername set, use defaults (should ideally not happen if welcome page sets it)
+        console.warn("No active user set. Using default settings.");
+        // currentGameUsername and currentDifficultySetting will retain their default 'Player' and 'medium'
     }
-    // Note: Game does not start automatically. User clicks "New Game".
+    // Game does not start automatically. User clicks "New Game".
 
     // Event listener for the New Game button
     if (newGameBtn) {
@@ -299,10 +303,25 @@ function checkWinCondition() {
         clearInterval(timerInterval);
     }
 
-    // Increment gamesCompleted in localStorage
-    let gamesCompleted = parseInt(localStorage.getItem('gamesCompleted') || '0');
-    gamesCompleted++;
-    localStorage.setItem('gamesCompleted', gamesCompleted.toString());
+    // Increment gamesCompleted for the active user
+    const activeUsernameForStat = localStorage.getItem('activeUsername'); // Re-fetch for safety, though currentGameUsername should be set
+    if (activeUsernameForStat) {
+        const allUsersJSONForStat = localStorage.getItem('sudokuUsers');
+        let allUsersForStat = allUsersJSONForStat ? JSON.parse(allUsersJSONForStat) : [];
+        const userIndex = allUsersForStat.findIndex(user => user.name === activeUsernameForStat);
+
+        if (userIndex > -1) {
+            allUsersForStat[userIndex].gamesCompleted = (allUsersForStat[userIndex].gamesCompleted || 0) + 1;
+            // Also update their lastDifficulty with the one used for this game, if it changed from their default
+            // This assumes currentDifficultySetting reflects the difficulty of the just-completed game.
+            allUsersForStat[userIndex].lastDifficulty = currentDifficultySetting;
+            localStorage.setItem('sudokuUsers', JSON.stringify(allUsersForStat));
+        } else {
+            console.warn(`Could not find user '${activeUsernameForStat}' to update gamesCompleted stat.`);
+        }
+    } else {
+        console.warn("No active user found to update gamesCompleted stat.");
+    }
 
     // Prepare time string for message from elapsedTimeInSeconds
     const minutes = Math.floor(elapsedTimeInSeconds / 60);

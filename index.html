@@ -11,8 +11,16 @@
         <h1>Sudoku Game</h1>
 
         <div id="player-info-welcome">
-            <label for="username-input-welcome">Player Name:</label>
-            <input type="text" id="username-input-welcome" placeholder="Enter your name">
+            <label for="user-select-dropdown">Select User:</label>
+            <select id="user-select-dropdown">
+                <!-- Options will be populated by JavaScript -->
+                <!-- e.g., <option value="">--- Select User ---</option> -->
+            </select>
+
+            <div id="new-user-section" style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee;">
+                <label for="new-username-input">Or Add New User:</label>
+                <input type="text" id="new-username-input" placeholder="Enter new name...">
+            </div>
         </div>
 
         <div id="difficulty-controls-welcome">
