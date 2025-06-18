@@ -1,6 +1,8 @@
 /* Basic Body Styling */
 body {
     font-family: Arial, sans-serif;
+    font-size: 16px; /* Explicitly set base font size */
+    line-height: 1.5; /* Base line height for readability */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -83,37 +85,59 @@ body {
 
 /* New Game Button Styling */
 #new-game-btn {
-    padding: 10px 20px;
-    font-size: 1em;
-    color: white;
-    background-color: #007bff;
-    border: none;
-    border-radius: 5px;
+    padding: 10px 22px; /* Adjusted padding */
+    font-size: 1em; /* Updated font-size */
+    color: #fff; /* White text */
+    background-color: #28a745; /* Professional green */
+    border: none; /* Ensure no border */
+    border-radius: 6px; /* Adjusted border-radius */
     cursor: pointer;
     margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle box-shadow */
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease, box-shadow 0.2s ease; /* Smooth transitions */
 }
 
 #new-game-btn:hover {
-    background-color: #0056b3;
+    background-color: #218838; /* Lighten background-color */
+    transform: translateY(-1px); /* Slight lift */
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15); /* Slightly increase box-shadow */
+}
+
+#new-game-btn:active {
+    transform: translateY(0); /* Pressed effect */
 }
 
 /* Message Area Styling */
 #message-area {
     min-height: 20px; /* Reserve space even when empty */
-    margin-top: 10px;
+    /* margin-top: 10px; Will be handled by specific message type margins */
     font-size: 1em;
-    color: #333;
+    color: #333; /* Default color if no specific class is applied */
+    width: 100%; /* Ensure it takes available width within its container */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
 /* Specific message types (optional for now, but good to have) */
 .message-error {
-    color: red;
-    font-weight: bold;
+    color: #721c24; /* Clear red text */
+    background-color: #f8d7da; /* Light red background */
+    border: 1px solid #f5c6cb; /* Red border */
+    padding: 10px 15px; /* Padding */
+    border-radius: 6px; /* Consistent border-radius */
+    margin-top: 15px; /* Margin top */
+    margin-bottom: 15px; /* Margin bottom */
+    /* font-weight: bold; Removed for cleaner callout style, emphasis from bg/border */
 }
 
 .message-success {
-    color: green;
-    font-weight: bold;
+    color: #155724; /* Clear green text */
+    background-color: #d4edda; /* Light green background */
+    border: 1px solid #c3e6cb; /* Green border */
+    padding: 10px 15px; /* Padding */
+    border-radius: 6px; /* Consistent border-radius */
+    margin-top: 15px; /* Margin top */
+    margin-bottom: 15px; /* Margin bottom */
+    /* font-weight: bold; Removed for cleaner callout style, emphasis from bg/border */
 }
 
 /* Difficulty Controls Styling */
@@ -127,16 +151,17 @@ body {
 }
 
 #difficulty-controls h3 {
-    margin: 0 0 10px 0; /* Top, Right, Bottom, Left */
+    margin: 0 0 12px 0; /* Consistent margin-bottom */
     font-size: 1.1em;
-    color: #333;
+    color: #34495e; /* Consistent color */
+    font-weight: 600; /* Consistent font-weight */
 }
 
 #difficulty-controls label {
-    margin-right: 15px;
+    margin-right: 15px; /* Ensured */
     font-size: 1em;
     color: #333;
-    cursor: pointer;
+    cursor: pointer; /* Ensured */
 }
 
 /* Remove margin from the last label to prevent extra space if centered */
@@ -146,21 +171,23 @@ body {
 
 /* Style radio buttons themselves - minor adjustments if needed */
 #difficulty-controls input[type="radio"] {
-    margin-right: 5px;
-    vertical-align: middle; /* Align radio button with label text */
+    margin-right: 5px; /* Ensured */
+    vertical-align: middle; /* Ensured */
 }
 
 /* Styles for input fields that can be shared */
 .shared-input-style {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    padding: 10px 12px; /* Adjusted padding */
+    border: 1px solid #ced4da; /* Consistent professional border */
+    border-radius: 6px; /* Consistent border-radius */
     font-size: 1em;
     box-sizing: border-box;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out; /* Smooth transition for focus */
 }
 .shared-input-style:focus {
-    border-color: #007bff;
-    outline: none;
+    border-color: #007bff; /* Primary blue border on focus */
+    outline: 0; /* Remove default outline */
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25); /* Subtle box-shadow for focus */
 }
 
 
@@ -176,16 +203,16 @@ body {
     max-width: 500px;
     margin: 40px auto; /* More margin for a dedicated page */
     padding: 30px;
-    background-color: #ffffff; /* White background for the container */
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* Slightly more pronounced shadow */
+    background-color: #ffffff; /* White background for the container - appropriate */
+    border-radius: 8px; /* Consistent with other elements or suitable for container */
+    box-shadow: 0 6px 18px rgba(0,0,0,0.07); /* Refined, more subtle shadow */
     text-align: center;
 }
 
 #welcome-container h1 {
-    font-size: 2.8em; /* Larger title for welcome page */
-    color: #2c3e50; /* Darker, more neutral heading color */
-    margin-bottom: 35px;
+    font-size: 2.5em; /* Adjusted font size */
+    color: #343a40; /* Softer dark color */
+    margin-bottom: 30px; /* Adjusted margin-bottom */
 }
 
 #player-info-welcome,
@@ -225,18 +252,23 @@ body {
     margin-right: auto;
 }
 /* Explicitly apply shared styles here if not done via class in HTML, or for clarity */
+/* #user-select-dropdown and #new-username-input will inherit from .shared-input-style if class is applied in HTML */
+/* If not, the styles below are direct target, but it's better to use the class for consistency. */
+/* Assuming .shared-input-style is applied, these specific rules can be reduced or removed if redundant. */
 #user-select-dropdown,
 #new-username-input {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px; /* Consistent with .shared-input-style */
+    padding: 10px 12px; /* Updated padding */
+    border: 1px solid #ced4da; /* Consistent professional border */
+    border-radius: 6px; /* Updated border-radius */
     font-size: 1em;
     box-sizing: border-box;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out; /* Smooth transition for focus */
 }
 #user-select-dropdown:focus,
 #new-username-input:focus {
-    border-color: #007bff; /* Consistent with .shared-input-style:focus */
-    outline: none;
+    border-color: #007bff; /* Primary blue border on focus */
+    outline: 0; /* Remove default outline */
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25); /* Subtle box-shadow for focus */
 }
 
 
@@ -244,15 +276,16 @@ body {
 #player-info-welcome > label[for="user-select-dropdown"],
 #new-user-section > label[for="new-username-input"] {
     display: block; /* Make label take its own line */
-    margin-bottom: 8px; /* Space between label and its control */
-    font-size: 1.0em; /* Adjusted from 1.1em for a cleaner look if too large */
-    color: #34495e; /* Match other labels in this section */
-    text-align: left; /* Align text to the left, above the centered input */
-    width: 90%; /* Match width of inputs for alignment */
-    max-width: 350px; /* Match width of inputs for alignment */
-    margin-left: auto; /* Center the label block itself */
-    margin-right: auto; /* Center the label block itself */
-    padding-left: 2px; /* Slight padding if inputs have internal padding affecting text start */
+    margin-bottom: 6px; /* Adjusted space between label and its control */
+    font-size: 1.0em;
+    font-weight: normal; /* Standardized font-weight */
+    color: #34495e;
+    text-align: left;
+    width: 90%;
+    max-width: 350px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 2px;
 }
 
 /* Container for the "Or Add New User" section */
@@ -266,14 +299,20 @@ body {
 
 
 #difficulty-controls-welcome label {
-    margin-right: 18px; /* More space for radio options */
+    margin-right: 15px; /* Adjusted space for radio options */
     cursor: pointer; /* Indicate they are clickable */
+    /* font-size and color are inherited from a broader rule:
+       #player-info-welcome label, #difficulty-controls-welcome h3, #difficulty-controls-welcome label ...
+       font-size: 1.1em; color: #34495e;
+       So, no need to repeat them here unless overriding.
+    */
 }
 #difficulty-controls-welcome label:last-of-type {
     margin-right: 0;
 }
 #difficulty-controls-welcome input[type="radio"] {
-    margin-right: 6px; /* Space between radio and its text */
+    margin-right: 5px; /* Adjusted space between radio and its text */
+    vertical-align: middle; /* Ensure alignment */
 }
 
 
@@ -285,24 +324,25 @@ body {
 
 #start-game-btn {
     display: inline-block;
-    padding: 15px 35px; /* Larger padding for a primary button */
-    font-size: 1.3em; /* Larger font size */
-    color: #fff;
-    background-color: #27ae60;
-    border: none;
-    border-radius: 5px;
+    padding: 12px 28px; /* Updated padding */
+    font-size: 1.1em; /* Updated font-size */
+    color: #fff; /* White text */
+    background-color: #007bff; /* Professional blue */
+    border: none; /* Ensure no border */
+    border-radius: 6px; /* Adjusted border-radius */
     cursor: pointer;
     text-decoration: none;
-    transition: background-color 0.2s ease-in-out, transform 0.1s ease;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle box-shadow */
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease, box-shadow 0.2s ease; /* Smooth transitions */
 }
 
 #start-game-btn:hover {
-    background-color: #229954;
-    transform: translateY(-1px); /* Slight lift on hover */
+    background-color: #0056b3; /* Lighten background-color */
+    transform: translateY(-1px); /* Slight lift */
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15); /* Slightly increase box-shadow */
 }
 #start-game-btn:active {
-    transform: translateY(0px); /* Button press effect */
+    transform: translateY(0); /* Pressed effect */
 }
 
 
@@ -315,7 +355,7 @@ body {
     background-color: #e9ecef; /* Lighter gray, more subtle */
     color: #495057; /* Darker text for better contrast */
     text-decoration: none;
-    border-radius: 4px;
+    border-radius: 6px; /* Consistent border-radius */
     font-size: 1em; /* Slightly larger for better clickability */
     border: 1px solid #ced4da; /* Subtle border */
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
