@@ -2,7 +2,7 @@
 let board = []; // 9x9 array for the current puzzle state
 let solution = []; // 9x9 array for the solved puzzle
 let timerInterval;
-let timeRemaining = 300; // 5 minutes in seconds
+let elapsedTimeInSeconds = 0; // For the elapsed timer
 
 // Global Variables (continued)
 let currentDifficulty = 'medium'; // Can be updated by getSelectedDifficulty
@@ -12,6 +12,7 @@ let timerDisplayElement; // For the timer display itself
 let gameBoardElement;    // For the game board container
 let newGameBtn;
 let messageArea;
+let usernameInput;       // For the username input field
 // cellInputs array is not strictly needed if we query cells by ID or use event.target
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -20,11 +21,19 @@ document.addEventListener('DOMContentLoaded', () => {
     gameBoardElement = document.getElementById('game-board');
     newGameBtn = document.getElementById('new-game-btn');
     messageArea = document.getElementById('message-area');
+    usernameInput = document.getElementById('username-input');
 
     if (!timerDisplayElement) console.error("Timer display element not found!");
     if (!gameBoardElement) console.error("Game board element not found!");
     if (!newGameBtn) console.error("New Game button not found!");
     if (!messageArea) console.error("Message area element not found!");
+    if (!usernameInput) console.error("Username input element not found!");
+
+    // Load username from cookie
+    const savedUsername = getCookie('sudokuUsername');
+    if (savedUsername && usernameInput) {
+        usernameInput.value = savedUsername;
+    }
 
     // Event listener for the New Game button
     if (newGameBtn) {
@@ -53,8 +62,18 @@ function getCellElement(row, col) {
 }
 
 function setupNewGame() {
-    clearInterval(timerInterval);
-    timeRemaining = 300; // Reset to 5 minutes
+    // Save username if entered
+    if (usernameInput) {
+        const currentUsername = usernameInput.value.trim();
+        if (currentUsername) { // Only save if not empty
+            setCookie('sudokuUsername', currentUsername, 30); // Save for 30 days
+        }
+        // Optional: To delete cookie if username is cleared
+        // else { setCookie('sudokuUsername', '', -1); }
+    }
+
+    // clearInterval(timerInterval); // startTimer will handle this
+    // timeRemaining = 300; // Reset to 5 minutes -> No longer needed for elapsed timer
 
     // Ensure board and timer are visible before starting everything
     if (gameBoardElement) {
@@ -74,8 +93,7 @@ function setupNewGame() {
         if (td) td.style.display = 'block';
     }
 
-    updateTimerDisplay(); // Update display now that it's visible
-
+    // updateTimerDisplay(); // startTimer will call this after resetting time
     currentDifficulty = getSelectedDifficulty(); // Update difficulty setting
     const puzzleAndSolution = generateSudokuPuzzle(); // Uses currentDifficulty
     board = puzzleAndSolution.puzzle;
@@ -128,11 +146,7 @@ function handleInput(event) {
     if (num !== 0) {
         if (num === solution[row][col]) {
             cell.classList.add('correct-input');
-            if (checkWinCondition()) {
-                clearInterval(timerInterval);
-                displayMessage("Congratulations! You solved it!", "success");
-                disableAllCells();
-            }
+            checkWinCondition(); // Will handle win message and timer stop
         } else {
             cell.classList.add('incorrect-input');
         }
@@ -239,39 +253,77 @@ function shuffle(array) {
 
 
 function startTimer() {
-    clearInterval(timerInterval); // Clear any existing timer
-    timerInterval = setInterval(decrementTimer, 1000);
-    updateTimerDisplay(); // Display initial time immediately
+    if (timerInterval) {
+        clearInterval(timerInterval);
+    }
+    elapsedTimeInSeconds = 0; // Reset elapsed time
+    updateTimerDisplay(); // Display 00:00 immediately
+    timerInterval = setInterval(incrementTimer, 1000);
 }
 
-function decrementTimer() {
-    timeRemaining--;
+function incrementTimer() { // Renamed from decrementTimer and logic changed
+    elapsedTimeInSeconds++;
     updateTimerDisplay();
-    if (timeRemaining <= 0) {
-        clearInterval(timerInterval);
-        displayMessage("Time's up! Game Over.", "error");
-        disableAllCells();
-    }
 }
 
 function updateTimerDisplay() {
-    const minutes = Math.floor(timeRemaining / 60);
-    const seconds = timeRemaining % 60;
+    if (!timerDisplayElement) return; // Guard clause
+
+    const minutes = Math.floor(elapsedTimeInSeconds / 60);
+    const seconds = elapsedTimeInSeconds % 60;
+    // Format as MM:SS
+    const formattedTime =
+        (minutes < 10 ? '0' : '') + minutes + ':' +
+        (seconds < 10 ? '0' : '') + seconds;
+
     if (timerDisplayElement) { // Check if the element exists
-        timerDisplayElement.textContent = `Time: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        timerDisplayElement.textContent = "Time: " + formattedTime;
     } else {
         // console.error("Timer display element not found for updating display.");
     }
+}
+
+// Cookie Helper Functions
+function setCookie(name, value, days) {
+    let expires = "";
+    if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/; SameSite=Lax";
+}
+
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
 }
 
 function checkWinCondition() {
     for (let r = 0; r < 9; r++) {
         for (let c = 0; c < 9; c++) {
             if (board[r][c] === 0 || board[r][c] !== solution[r][c]) {
-                return false; // Not all cells are filled correctly
+                return false; // Not all cells are filled correctly or some are empty
             }
         }
     }
+    // If loop completes, all cells are filled and correct - it's a win
+    if (timerInterval) {
+        clearInterval(timerInterval);
+    }
+    // Prepare time string for message from elapsedTimeInSeconds
+    const minutes = Math.floor(elapsedTimeInSeconds / 60);
+    const seconds = elapsedTimeInSeconds % 60;
+    const timeString = (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+
+    displayMessage(`Congratulations! You solved it in ${timeString}!`, "success");
+    disableAllCells();
     return true; // All cells filled correctly
 }
 

@@ -149,3 +149,30 @@ body {
     margin-right: 5px;
     vertical-align: middle; /* Align radio button with label text */
 }
+
+/* Player Info (Username Input) Styling */
+#player-info {
+    margin-bottom: 15px; /* Space below username input area */
+    padding: 10px;
+    text-align: center; /* Align with other control sections */
+}
+
+#player-info label {
+    margin-right: 8px;
+    font-size: 1em; /* Consistent with other labels */
+    color: #333;   /* Consistent with other text */
+}
+
+#username-input {
+    padding: 8px 10px; /* Vertical and horizontal padding */
+    border: 1px solid #ccc;
+    border-radius: 5px; /* Match button radius */
+    font-size: 0.9em;
+    /* width: 200px; */ /* Optional: specific width, or leave to default/flex sizing */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+#username-input:focus {
+    border-color: #007bff; /* Highlight on focus, matching button color */
+    outline: none; /* Remove default browser outline */
+}
