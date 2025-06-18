@@ -1,0 +1,116 @@
+/* Basic Body Styling */
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+
+/* Game Board Styling */
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(9, 40px);
+    grid-template-rows: repeat(9, 40px);
+    border: 3px solid #333;
+    margin-bottom: 20px;
+}
+
+/* Cell Styling */
+#game-board input {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    font-size: 20px;
+    border: 1px solid #ccc;
+    box-sizing: border-box; /* Ensures padding and border are included in the element's total width and height */
+    outline: none;
+}
+
+/* Thicker borders for 3x3 subgrids */
+#game-board input:nth-child(3n) {
+    border-right-width: 3px;
+    border-right-color: #333;
+}
+
+#game-board input:nth-child(9n) {
+     border-right-width: 1px; /* Reset right border for the last cell in a row */
+     border-right-color: #ccc;
+}
+
+
+/* Select rows for thicker bottom border - this is a bit more complex with inputs directly in the grid */
+/* We'll target cells in the 3rd and 6th row equivalent positions */
+/* Cells 19-27 (3rd row), 46-54 (6th row) */
+#game-board input:nth-child(n+19):nth-child(-n+27),
+#game-board input:nth-child(n+46):nth-child(-n+54) {
+    border-bottom-width: 3px;
+    border-bottom-color: #333;
+}
+/* Correct the right border for the last cell in the 3x3 subgrids */
+#game-board input:nth-child(9n-6), /* 3rd cell in each row */
+#game-board input:nth-child(9n-3) { /* 6th cell in each row */
+     border-right-width: 3px;
+     border-right-color: #333;
+}
+
+
+/* Input Highlighting Classes */
+.correct-input {
+    color: green;
+}
+
+.incorrect-input {
+    color: red;
+}
+
+.prefilled-cell {
+    background-color: #e0e0e0;
+    font-weight: bold;
+    /* read-only attribute will be set via JavaScript */
+}
+
+/* Timer Styling */
+#timer {
+    font-size: 2em;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* New Game Button Styling */
+#new-game-btn {
+    padding: 10px 20px;
+    font-size: 1em;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+#new-game-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Message Area Styling */
+#message-area {
+    min-height: 20px; /* Reserve space even when empty */
+    margin-top: 10px;
+    font-size: 1em;
+    color: #333;
+}
+
+/* Specific message types (optional for now, but good to have) */
+.message-error {
+    color: red;
+    font-weight: bold;
+}
+
+.message-success {
+    color: green;
+    font-weight: bold;
+}
