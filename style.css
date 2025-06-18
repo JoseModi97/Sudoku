@@ -114,3 +114,37 @@ body {
     color: green;
     font-weight: bold;
 }
+
+/* Difficulty Controls Styling */
+#difficulty-controls {
+    margin-top: 15px;
+    margin-bottom: 20px;
+    text-align: center;
+    padding: 10px;
+    /* border: 1px solid #ddd; */ /* Optional: if a visual grouping is desired */
+    /* border-radius: 5px; */
+}
+
+#difficulty-controls h3 {
+    margin: 0 0 10px 0; /* Top, Right, Bottom, Left */
+    font-size: 1.1em;
+    color: #333;
+}
+
+#difficulty-controls label {
+    margin-right: 15px;
+    font-size: 1em;
+    color: #333;
+    cursor: pointer;
+}
+
+/* Remove margin from the last label to prevent extra space if centered */
+#difficulty-controls label:last-of-type {
+    margin-right: 0;
+}
+
+/* Style radio buttons themselves - minor adjustments if needed */
+#difficulty-controls input[type="radio"] {
+    margin-right: 5px;
+    vertical-align: middle; /* Align radio button with label text */
+}

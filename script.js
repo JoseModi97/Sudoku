@@ -112,18 +112,40 @@ function generateSudokuPuzzle() {
 
     // Create puzzle by removing cells (e.g., 40 cells for medium)
     // This is a simple removal strategy. For ideal puzzles, uniqueness should be checked.
-    let cellsToRemove = 40;
-    let attempts = 0; // Prevent infinite loop for very difficult puzzles
-    while (cellsToRemove > 0 && attempts < 1000) {
+    // Create puzzle by removing cells based on difficulty
+    const difficulty = getSelectedDifficulty();
+    let cellsToActuallyRemove;
+    if (difficulty === 'easy') {
+        cellsToActuallyRemove = 30; // Fewer cells removed for easy
+    } else if (difficulty === 'hard') {
+        cellsToActuallyRemove = 50; // More cells removed for hard
+    } else { // Medium or default
+        cellsToActuallyRemove = 40;
+    }
+
+    let removedCount = 0;
+    let attempts = 0; // Prevent infinite loop
+    // Ensure not to remove too many cells making puzzle too sparse or generation too long
+    const maxAttempts = 200; // Adjust as needed, relates to grid size
+
+    while (removedCount < cellsToActuallyRemove && attempts < maxAttempts) {
         let r = Math.floor(Math.random() * 9);
         let c = Math.floor(Math.random() * 9);
         if (puzzle[r][c] !== 0) {
             puzzle[r][c] = 0; // Mark as empty
-            cellsToRemove--;
+            removedCount++;
         }
         attempts++;
     }
+    // For development: Log how many cells were actually removed
+    // console.log(`Difficulty: ${difficulty}, Target remove: ${cellsToActuallyRemove}, Actually removed: ${removedCount}`);
+
     return { puzzle: puzzle, solution: solvedBoard };
+}
+
+function getSelectedDifficulty() {
+    const checkedRadio = document.querySelector('input[name="difficulty"]:checked');
+    return checkedRadio ? checkedRadio.value : 'medium'; // Default to medium
 }
 
 function generateFullSolution() {
