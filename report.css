@@ -1,0 +1,128 @@
+/* report.css */
+
+body {
+    /* Ensure body styles from style.css are complemented if needed,
+       but style.css should handle base font, background etc. */
+    padding-bottom: 30px; /* Ensure space for content if it gets long */
+}
+
+#report-container {
+    max-width: 800px; /* Wider container for report data */
+    margin: 20px auto; /* Adjusted top margin */
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.07);
+    text-align: left; /* Reports are better left-aligned */
+}
+
+#report-container h1 {
+    font-size: 2em; /* Slightly smaller than welcome page H1 */
+    color: #17a2b8; /* Accent Teal - consistent with welcome page H1 */
+    margin-bottom: 20px;
+    text-align: center; /* Center the main page title */
+}
+
+#report-user-selection {
+    margin-bottom: 25px;
+    text-align: center; /* Center the dropdown selection */
+}
+
+#report-user-selection label {
+    margin-right: 10px;
+    font-weight: 500;
+    color: #34495e;
+}
+
+#report-user-select {
+    /* Uses .shared-input-style from style.css for base styling */
+    padding: 8px 10px; /* Ensure consistency if not fully covered by class */
+    min-width: 250px;
+    /* Apply shared input style if not done via class in HTML, or ensure it inherits */
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 1em; /* Ensure it's consistent */
+}
+#report-user-select:focus { /* From .shared-input-style */
+    border-color: #007bff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+
+#performance-summary h2,
+#performance-analysis h3 {
+    color: #007bff; /* Primary Blue for section titles */
+    margin-top: 20px;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #e0e0e0; /* Subtle separator */
+}
+#performance-summary h2 { /* Username specific title */
+    text-align: center;
+    font-size: 1.6em;
+    border-bottom: none; /* No border for the username title */
+    color: #34495e; /* Darker, more neutral for username */
+}
+
+
+#difficulty-stats {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    gap: 20px; /* Space between difficulty blocks */
+    justify-content: space-around; /* Distribute blocks nicely */
+}
+
+.difficulty-block {
+    background-color: #f8f9fa; /* Light neutral background */
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #dee2e6; /* Subtle border */
+    flex: 1; /* Allow blocks to grow */
+    min-width: 200px; /* Minimum width before wrapping */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.difficulty-block h4 {
+    font-size: 1.2em;
+    color: #17a2b8; /* Accent Teal for difficulty titles (Easy, Medium, Hard) */
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.difficulty-block p {
+    margin-bottom: 8px;
+    font-size: 0.95em;
+    color: #495057; /* Slightly lighter text color for details */
+}
+.difficulty-block p span {
+    font-weight: 600;
+    color: #333; /* Darker color for stat values */
+}
+
+#performance-analysis {
+    margin-top: 30px;
+}
+
+#sharpness-assessment p,
+#improvement-room p {
+    font-size: 1em;
+    line-height: 1.6;
+    color: #34495e;
+    background-color: #e6f7ff; /* Light blue background, similar to cell hover */
+    padding: 10px;
+    border-radius: 5px;
+    border-left: 5px solid #007bff; /* Primary blue accent border */
+    margin-bottom: 15px; /* Add some space between these paragraphs if multiple appear */
+}
+
+#sharpness-assessment p strong,
+#improvement-room p strong {
+    color: #0056b3; /* Darker blue for emphasis */
+}
+
+.navigation-links { /* Already styled in report.html, but can be centralized */
+    text-align: center;
+    margin-top: 30px; /* Ensure enough space from content */
+}
+/* .secondary-action-link is already in style.css */

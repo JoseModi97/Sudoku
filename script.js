@@ -313,13 +313,27 @@ function checkWinCondition() {
         const userIndex = allUsersForStat.findIndex(user => user.name === activeUsernameForStat);
 
         if (userIndex > -1) {
-            allUsersForStat[userIndex].gamesCompleted = (allUsersForStat[userIndex].gamesCompleted || 0) + 1;
-            // Also update their lastDifficulty with the one used for this game, if it changed from their default
-            // This assumes currentDifficultySetting reflects the difficulty of the just-completed game.
+            // Initialize gameHistory if it doesn't exist
+            if (!allUsersForStat[userIndex].gameHistory) {
+                allUsersForStat[userIndex].gameHistory = [];
+            }
+
+            // Create a new game record
+            const gameRecord = {
+                date: new Date().toISOString(),
+                timeTaken: elapsedTimeInSeconds,
+                difficulty: currentDifficultySetting
+            };
+            allUsersForStat[userIndex].gameHistory.push(gameRecord);
+
+            // gamesCompleted can be derived from gameHistory.length, so direct increment is removed.
+            // allUsersForStat[userIndex].gamesCompleted = (allUsersForStat[userIndex].gamesCompleted || 0) + 1; // Removed
+
+            // Update lastDifficulty
             allUsersForStat[userIndex].lastDifficulty = currentDifficultySetting;
             localStorage.setItem('sudokuUsers', JSON.stringify(allUsersForStat));
         } else {
-            console.warn(`Could not find user '${activeUsernameForStat}' to update gamesCompleted stat.`);
+            console.warn(`Could not find user '${activeUsernameForStat}' to update game history stat.`);
         }
     } else {
         console.warn("No active user found to update gamesCompleted stat.");
