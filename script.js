@@ -681,8 +681,12 @@ function checkWinCondition() {
     const seconds = elapsedTimeInSeconds % 60;
     const timeString = (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
 
-    displayMessage(`Congratulations, ${currentGameUsername}! You solved it in ${timeString} on ${currentDifficultySetting} difficulty!`, "success");
-    disableAllCells();
+    // displayMessage(`Congratulations, ${currentGameUsername}! You solved it in ${timeString} on ${currentDifficultySetting} difficulty!`, "success"); // Removed
+    disableAllCells(); // Keep this: cells are disabled on win before redirect
+
+    // Redirect to congratulations page
+    window.location.href = `congratulations.html?user=${encodeURIComponent(currentGameUsername)}&time=${encodeURIComponent(timeString)}&difficulty=${encodeURIComponent(currentDifficultySetting)}`;
+
     return true; // All cells filled correctly
 }
 
