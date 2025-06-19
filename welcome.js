@@ -104,10 +104,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const difficultyRadios = document.querySelectorAll('input[name="difficulty-welcome"]'); // Corrected name
     const gamesCompletedDisplay = document.getElementById('games-completed-display');
     const startGameBtn = document.getElementById('start-game-btn');
-    const loadSavedGameLink = document.getElementById('load-saved-game-link'); // New reference
+    const savedGamesSection = document.getElementById('saved-games-section');
+    const savedGamesUl = document.getElementById('saved-games-list');
+    const noSavedGamesMsg = document.getElementById('no-saved-games-msg');
 
     // Check if all elements are found
-    if (!userSelectDropdown || !newUsernameInput || difficultyRadios.length === 0 || !gamesCompletedDisplay || !startGameBtn || !loadSavedGameLink) {
+    if (!userSelectDropdown || !newUsernameInput || difficultyRadios.length === 0 || !gamesCompletedDisplay || !startGameBtn || !savedGamesSection || !savedGamesUl || !noSavedGamesMsg) {
         console.error("One or more essential UI elements for welcome.js were not found. Aborting setup.");
         // Log individual missing elements for easier debugging
         if (!userSelectDropdown) console.error("userSelectDropdown missing");
@@ -115,11 +117,38 @@ document.addEventListener('DOMContentLoaded', () => {
         if (difficultyRadios.length === 0) console.error("difficultyRadios missing or empty");
         if (!gamesCompletedDisplay) console.error("gamesCompletedDisplay missing");
         if (!startGameBtn) console.error("startGameBtn missing");
-        if (!loadSavedGameLink) console.error("loadSavedGameLink missing");
+        if (!savedGamesSection) console.error("savedGamesSection missing");
+        if (!savedGamesUl) console.error("savedGamesUl missing");
+        if (!noSavedGamesMsg) console.error("noSavedGamesMsg missing");
         return; // Stop further execution if critical elements are missing
     }
 
-    // Removed formatElapsedTime, handleResumeGame, handleDeleteSavedGame
+    function formatElapsedTime(totalSeconds) { // Similar to report.js
+        if (isNaN(totalSeconds) || totalSeconds === null || totalSeconds < 0) return "N/A";
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    }
+
+    function handleResumeGame(username, gameId) {
+        localStorage.setItem('activeUsername', username); // Ensure correct user is active
+        localStorage.setItem('sudokuGameToLoad', gameId);
+        window.location.href = 'game.html';
+    }
+
+    function handleDeleteSavedGame(username, gameId) {
+        if (!confirm("Are you sure you want to delete this saved game?")) return;
+
+        let users = getUsers();
+        const userIndex = users.findIndex(u => u.name === username);
+        if (userIndex > -1) {
+            if (users[userIndex].savedGamesList) {
+                users[userIndex].savedGamesList = users[userIndex].savedGamesList.filter(game => game.id !== gameId);
+                saveUsers(users); // Save updated users array
+                displayUserSettings(username); // Refresh the displayed list
+            }
+        }
+    }
 
     function populateUserDropdown() {
         const users = getUsers();
@@ -155,15 +184,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 radio.checked = (radio.value === selectedUser.lastDifficulty);
             });
 
-            });
+            // Display saved games list
+            if (selectedUser.savedGamesList && selectedUser.savedGamesList.length > 0) {
+                savedGamesUl.innerHTML = ''; // Clear previous list
+                selectedUser.savedGamesList.sort((a,b) => new Date(b.savedAt) - new Date(a.savedAt)); // Show newest first
 
-            // Show/hide "Load Saved Game" link
-            if (loadSavedGameLink) {
-                if (selectedUser.savedGamesList && selectedUser.savedGamesList.length > 0) {
-                    loadSavedGameLink.style.display = 'inline-block';
-                } else {
-                    loadSavedGameLink.style.display = 'none';
-                }
+                selectedUser.savedGamesList.forEach(game => {
+                    const li = document.createElement('li');
+                    li.setAttribute('data-game-id', game.id);
+
+                    const details = document.createElement('span');
+                    details.className = 'game-details';
+                    const savedDate = new Date(game.savedAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }); // Format date more concisely
+                    const timePlayed = formatElapsedTime(game.elapsedTimeInSeconds);
+
+                    details.innerHTML = `Difficulty: <strong>${game.difficulty}</strong>, Saved: <strong>${savedDate}</strong>, Time: <strong>${timePlayed}</strong> (ID: ...${game.id.slice(-6)})`;
+
+                    const resumeBtn = document.createElement('button');
+                    resumeBtn.className = 'resume-game-btn';
+                    resumeBtn.textContent = 'Resume';
+                    resumeBtn.onclick = () => handleResumeGame(selectedUser.name, game.id);
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-game-btn';
+                    deleteBtn.textContent = 'Delete';
+                    deleteBtn.onclick = () => handleDeleteSavedGame(selectedUser.name, game.id);
+
+                    const buttonsDiv = document.createElement('div');
+                    buttonsDiv.appendChild(resumeBtn);
+                    buttonsDiv.appendChild(deleteBtn);
+
+                    li.appendChild(details);
+                    li.appendChild(buttonsDiv);
+                    savedGamesUl.appendChild(li);
+                });
+                savedGamesSection.style.display = 'block';
+                noSavedGamesMsg.style.display = 'none';
+            } else {
+                savedGamesSection.style.display = 'none';
+                noSavedGamesMsg.style.display = 'block';
             }
 
         } else { // No selectedUser
@@ -171,9 +230,8 @@ document.addEventListener('DOMContentLoaded', () => {
             difficultyRadios.forEach(radio => {
                 radio.checked = (radio.value === 'medium'); // Default to medium
             });
-            if (loadSavedGameLink) { // Hide link if no user selected
-                loadSavedGameLink.style.display = 'none';
-            }
+            savedGamesSection.style.display = 'none';
+            noSavedGamesMsg.style.display = 'none'; // Hide if no user is selected at all
         }
     }
 
@@ -183,16 +241,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event Listeners
     userSelectDropdown.addEventListener('change', () => {
         const selectedUsername = userSelectDropdown.value;
-        displayUserSettings(selectedUsername); // This will show/hide the load link
-        if (selectedUsername) {
-            newUsernameInput.value = '';
+        displayUserSettings(selectedUsername);
+        if (selectedUsername) { // If a user is selected (not the placeholder)
+            newUsernameInput.value = ''; // Clear new user input
             localStorage.setItem('lastActiveUser', selectedUsername);
-            localStorage.setItem('activeUsername', selectedUsername); // Set for loadgame.html
         } else {
-            localStorage.removeItem('lastActiveUser');
-            localStorage.removeItem('activeUsername'); // Clear active user if placeholder selected
-            // displayUserSettings("") already handles hiding the link if it's part of it.
-            // Explicitly hide if (loadSavedGameLink) loadSavedGameLink.style.display = 'none'; is already handled by displayUserSettings("")
+            localStorage.removeItem('lastActiveUser'); // Clear if placeholder is selected
         }
     });
 
@@ -200,14 +254,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (newUsernameInput.value.trim() !== "") {
             if (userSelectDropdown.value !== "") { // if an existing user was selected
                 userSelectDropdown.value = ""; // Reset dropdown to placeholder
-                localStorage.removeItem('lastActiveUser');
-                localStorage.removeItem('activeUsername'); // Clear active user
-                displayUserSettings(""); // Update UI (hides load link)
+                displayUserSettings(""); // Update UI for a new user (resets stats/difficulty)
+                localStorage.removeItem('lastActiveUser'); // Clear last active user since we're typing a new one
             }
-        } else { // If new username input is cleared
-             if(userSelectDropdown.value === "") { // And no user is selected in dropdown
-                if (loadSavedGameLink) loadSavedGameLink.style.display = 'none'; // Explicitly hide link
-             }
         }
     });
 

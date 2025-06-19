@@ -34,11 +34,25 @@
             <p>Games Completed: <span id="games-completed-display">0</span></p>
         </div>
 
+        <div id="saved-games-section" style="display: none; margin-top: 20px;">
+            <h3>Saved Games</h3>
+            <ul id="saved-games-list" style="list-style-type: none; padding: 0;">
+                <!-- Saved games will be populated here by JavaScript
+                Example list item structure:
+                <li data-game-id="[game.id]">
+                    Difficulty: [game.difficulty], Saved: [formatted date], Time: [formatted time]
+                    <button class="resume-game-btn">Resume</button>
+                    <button class="delete-game-btn">Delete</button>
+                </li>
+                -->
+            </ul>
+            <p id="no-saved-games-msg" style="display: none;">No saved games found for this user.</p>
+        </div>
+
         <button id="start-game-btn">Start Game</button>
 
         <div id="navigation-links-welcome" style="margin-top: 25px; text-align: center;">
             <a href="report.html" id="view-reports-link" class="secondary-action-link">View Performance Reports</a>
-            <a href="loadgame.html" id="load-saved-game-link" class="secondary-action-link" style="display: none; margin-left:10px;">Load Saved Game</a>
         </div>
     </div>
 
