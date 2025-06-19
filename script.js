@@ -1,6 +1,7 @@
 // Global Variables
 let board = []; // 9x9 array for the current puzzle state
 let solution = []; // 9x9 array for the solved puzzle
+let initialPuzzleBoard = []; // Stores the initial state of the puzzle for reset functionality
 let timerInterval;
 let elapsedTimeInSeconds = 0; // For the elapsed timer
 
@@ -146,7 +147,29 @@ document.addEventListener('DOMContentLoaded', () => {
         // gameToResume will be null. A new game will start.
 
         if (gameToResume) {
-            board = gameToResume.board;
+            if (gameToResume.currentBoardState) {
+                board = gameToResume.currentBoardState;
+                if (gameToResume.initialPuzzleState) {
+                    initialPuzzleBoard = gameToResume.initialPuzzleState;
+                } else {
+                    // Game has currentBoardState but no initialPuzzleState (transitional save or error)
+                    // Default to making all cells appear as part of the puzzle for rendering
+                    initialPuzzleBoard = JSON.parse(JSON.stringify(gameToResume.currentBoardState));
+                    console.warn(`Game ${gameToResume.id} loaded with currentBoardState but no initialPuzzleState. Cells may not be editable as expected if this was a partially played game.`);
+                }
+            } else if (gameToResume.board) { // Fallback for very old saved games using the 'board' property
+                console.log(`Loading legacy saved game (ID: ${gameToResume.id}) using 'board' property.`);
+                board = JSON.parse(JSON.stringify(gameToResume.board)); // Deep copy for safety
+                // For these very old games, all non-zero cells will appear as pre-filled by renderBoard
+                // because initialPuzzleBoard will mirror the current board state.
+                initialPuzzleBoard = JSON.parse(JSON.stringify(gameToResume.board));
+            } else {
+                console.error("Critical: Saved game has no board state (currentBoardState or board). Cannot load.", gameToResume.id);
+                // Potentially trigger a new game setup or display an error
+                setupNewGame(); // Fallback to a new game
+                return; // Exit further resume logic
+            }
+
             solution = gameToResume.solution;
             elapsedTimeInSeconds = gameToResume.elapsedTimeInSeconds;
             currentDifficultySetting = gameToResume.difficulty;
@@ -276,6 +299,7 @@ function setupNewGame() {
     const puzzleAndSolution = generateSudokuPuzzle(); // Uses currentDifficultySetting
     board = puzzleAndSolution.puzzle;
     solution = puzzleAndSolution.solution;
+    initialPuzzleBoard = JSON.parse(JSON.stringify(board)); // Deep copy for reset
 
     renderBoard();
     startTimer(); // This will start timer from 0 due to reset above
@@ -290,17 +314,44 @@ function renderBoard() {
     for (let r = 0; r < 9; r++) {
         for (let c = 0; c < 9; c++) {
             const cell = getCellElement(r, c);
-            if (!cell) continue; // Skip if cell not found
+            if (!cell) continue;
 
-            cell.classList.remove('correct-input', 'incorrect-input', 'prefilled-cell');
+            // Reset cell state
+            cell.classList.remove('correct-input', 'incorrect-input', 'prefilled-cell', 'user-input'); // Added 'user-input' for potential future styling
             cell.removeAttribute('readonly');
 
-            if (board[r][c] !== 0) { // 0 represents an empty cell in the puzzle
-                cell.value = board[r][c];
+            const initialValue = (initialPuzzleBoard && initialPuzzleBoard[r] && initialPuzzleBoard[r][c] !== undefined)
+                                 ? initialPuzzleBoard[r][c]
+                                 : 0;
+            const currentValue = (board && board[r] && board[r][c] !== undefined)
+                                 ? board[r][c]
+                                 : 0;
+
+            if (initialValue !== 0) {
+                // This cell was part of the original puzzle
+                cell.value = currentValue; // Should ideally be same as initialValue if not tampered
                 cell.setAttribute('readonly', true);
                 cell.classList.add('prefilled-cell');
             } else {
-                cell.value = '';
+                // This cell was originally empty, user might have filled it
+                if (currentValue !== 0) {
+                    cell.value = currentValue;
+                    // Optional: Add a general class for user inputs if needed for styling
+                    // cell.classList.add('user-input');
+
+                    // Validate user's input against the solution if solution is available
+                    if (solution && solution[r] && solution[r][c] !== undefined) {
+                        if (currentValue === solution[r][c]) {
+                            cell.classList.add('correct-input');
+                        } else {
+                            cell.classList.add('incorrect-input');
+                        }
+                    }
+                } else {
+                    cell.value = ''; // Cell is empty
+                }
+                // Ensure it's not readonly for originally empty cells
+                cell.removeAttribute('readonly');
             }
         }
     }
@@ -496,7 +547,8 @@ function saveCurrentGame() {
         const now = new Date().toISOString();
         const gameState = {
             id: activeGameId,
-            board: board,
+            currentBoardState: board, // Renamed from 'board'
+            initialPuzzleState: initialPuzzleBoard, // Added
             solution: solution,
             elapsedTimeInSeconds: elapsedTimeInSeconds,
             difficulty: currentDifficultySetting,
