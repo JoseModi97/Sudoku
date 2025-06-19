@@ -1,0 +1,117 @@
+/* loadgame.css */
+
+body {
+    /* Base styles from style.css (font, bg color) are inherited.
+       Add specific padding if footer/bottom elements are an issue. */
+    padding-bottom: 30px;
+}
+
+#loadgame-container {
+    max-width: 700px; /* Slightly narrower than reports, wider than welcome */
+    margin: 20px auto;
+    padding: 25px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.07);
+}
+
+#loadgame-container h1 {
+    font-size: 2em;
+    color: #007bff; /* Primary Blue for this page's main title */
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#loadgame-container p#loadgame-username {
+    text-align: center;
+    font-size: 1.1em;
+    color: #495057;
+    margin-bottom: 25px;
+}
+#loadgame-container p#loadgame-username strong {
+    color: #17a2b8; /* Accent Teal for username */
+}
+
+#loadable-games-section {
+    margin-top: 15px;
+}
+
+#loadable-games-list li {
+    background-color: #f8f9fa; /* Light background for each item */
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: box-shadow 0.2s ease-in-out;
+}
+#loadable-games-list li:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+#loadable-games-list li .game-details {
+    flex-grow: 1;
+    margin-right: 15px;
+    font-size: 0.9em; /* Slightly smaller for density if needed */
+    color: #34495e; /* Darker text for details */
+    line-height: 1.5;
+}
+#loadable-games-list li .game-details strong {
+    color: #0056b3; /* Darker blue for emphasized parts of details */
+    font-weight: 600;
+}
+/* Specific emphasis for parts of details if needed */
+.game-details span { /* If specific spans are used for parts of details */
+    margin-right: 10px; /* Example if they were inline spans */
+}
+
+
+#loadable-games-list li .game-actions button {
+    /* Using styles similar to .secondary-action-link but smaller */
+    /* These styles will apply if generic button classes are not sufficient or to override */
+    padding: 6px 12px;
+    font-size: 0.85em;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    margin-left: 8px;
+    color: #fff; /* Default white text for colored buttons */
+    border: none; /* Remove border if background is colored */
+}
+
+/* Specific styles for resume and delete buttons within #loadable-games-list.
+   These will combine with or override styles in style.css for .resume-game-btn / .delete-game-btn if they exist globally.
+   It's often better to make global styles less specific if they are intended for reuse.
+*/
+#loadable-games-list li button.resume-game-btn {
+    background-color: #28a745; /* Success Green */
+    /* border: 1px solid #218838; */ /* Border already handled by style.css or above */
+}
+#loadable-games-list li button.resume-game-btn:hover {
+    background-color: #218838;
+}
+
+#loadable-games-list li button.delete-game-btn {
+    background-color: #dc3545; /* Error Red */
+    /* border: 1px solid #c82333; */ /* Border already handled by style.css or above */
+}
+#loadable-games-list li button.delete-game-btn:hover {
+    background-color: #c82333;
+}
+
+
+#no-loadable-games-msg {
+    text-align: center;
+    font-size: 1em;
+    color: #6c757d; /* Muted text color */
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    border: 1px dashed #dee2e6;
+}
+
+/* .navigation-links and .secondary-action-link are already styled in style.css */
+/* Ensure #back-to-welcome-from-load uses .secondary-action-link class in HTML */
