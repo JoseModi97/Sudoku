@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const userSelectDropdown = document.getElementById('user-select-saved-games');
+    const userSelectDropdown = document.getElementById('report-user-select');
     const savedGamesListElement = document.getElementById('saved-games-list');
     const noSavedGamesMsg = document.getElementById('no-saved-games-msg');
 
@@ -90,8 +90,10 @@ document.addEventListener('DOMContentLoaded', () => {
             sortedGames.forEach(game => {
                 const listItem = document.createElement('li');
                 listItem.setAttribute('data-game-id', game.id);
+                listItem.classList.add('difficulty-block'); // Added for styling consistency
 
                 const gameInfo = document.createElement('span');
+                gameInfo.classList.add('game-info-span'); // Add this class
                 const savedDate = new Date(game.savedAt).toLocaleString();
                 const timePlayed = formatTime(game.elapsedTimeInSeconds);
                 gameInfo.textContent = `Difficulty: ${game.difficulty}, Saved: ${savedDate}, Time: ${timePlayed} `;
