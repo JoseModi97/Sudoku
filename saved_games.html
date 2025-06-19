@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Sudoku Games</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="saved-games-container">
+        <h1>Saved Games</h1>
+
+        <div id="user-display-section">
+            <p>Showing saved games for: <span id="current-user-display"></span></p>
+            <p>If this is not the correct user, please <a href="index.html">select a user on the main page</a>.</p>
+        </div>
+
+        <ul id="saved-games-list" style="list-style-type: none; padding: 0;">
+            <!-- Saved games will be populated here by JavaScript
+            Example list item structure:
+            <li data-game-id="[game.id]">
+                Difficulty: [game.difficulty], Saved: [formatted date], Time: [formatted time]
+                <button class="resume-game-btn">Resume</button>
+                <button class="delete-game-btn">Delete</button>
+            </li>
+            -->
+        </ul>
+        <p id="no-saved-games-msg" style="display: none;">No saved games found for this user.</p>
+
+        <div id="navigation-links-saved" style="margin-top: 25px; text-align: center;">
+            <a href="index.html" class="secondary-action-link">Back to Main Page</a>
+        </div>
+    </div>
+
+    <script src="saved_games.js"></script>
+</body>
+</html>
