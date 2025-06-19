@@ -17,6 +17,7 @@ let pauseGameBtn;
 let resumeGameBtn;
 let pauseOverlay;
 let isGamePaused = false; // State variable
+let activeGameId = null;
 
 // Minimal getUsers for script.js, ensuring savedGame property is handled
 function getUsers() {
@@ -24,11 +25,34 @@ function getUsers() {
     if (!usersJSON) return [];
     try {
         const users = JSON.parse(usersJSON);
-        return Array.isArray(users) ? users.map(user => ({
-            ...user,
-            gameHistory: Array.isArray(user.gameHistory) ? user.gameHistory : [],
-            savedGame: user.savedGame || null
-        })) : [];
+        return Array.isArray(users) ? users.map(user => {
+            let savedGamesList = [];
+            if (Array.isArray(user.savedGamesList)) {
+                savedGamesList = user.savedGamesList;
+            }
+
+            if (user.savedGame && typeof user.savedGame === 'object' && Object.keys(user.savedGame).length > 0) {
+                if (savedGamesList.length === 0) {
+                    const now = new Date().toISOString();
+                    savedGamesList.push({
+                        id: Date.now().toString() + "_migrated",
+                        board: user.savedGame.board,
+                        solution: user.savedGame.solution,
+                        elapsedTimeInSeconds: user.savedGame.elapsedTimeInSeconds,
+                        difficulty: user.savedGame.difficulty,
+                        savedAt: now
+                    });
+                }
+                delete user.savedGame;
+            }
+
+            return {
+                ...user,
+                gameHistory: Array.isArray(user.gameHistory) ? user.gameHistory : [],
+                savedGamesList: savedGamesList,
+                savedGame: undefined
+            };
+        }).map(user => { delete user.savedGame; return user; }) : [];
     } catch (error) {
         console.error("Error parsing sudokuUsers from localStorage (script.js):", error);
         return [];
@@ -80,53 +104,74 @@ document.addEventListener('DOMContentLoaded', () => {
     // setupNewGame(); // Original automatic call moved into resume logic
 
     // Load and Resume Game Logic
-    let resumeGameAccepted = false;
-    // Re-fetch activeUserObject with the new getUsers that ensures savedGame structure
-    const usersForResume = getUsers();
-    const activeUserForResume = activeUsername ? usersForResume.find(user => user.name === activeUsername) : null;
+    let gameSuccessfullyResumed = false;
+    const gameIdToLoad = localStorage.getItem('sudokuGameToLoad');
+    localStorage.removeItem('sudokuGameToLoad'); // Consume the item
 
+    // Ensure activeUserForResume is fetched using the script's getUsers
+    const usersForResumeCheck = getUsers();
+    const activeUserForResumeLogic = activeUsername ? usersForResumeCheck.find(user => user.name === activeUsername) : null;
 
-    if (activeUserForResume && activeUserForResume.savedGame) {
-        if (confirm(`${activeUserForResume.name}, you have an unfinished game. Would you like to resume it?`)) {
-            // User wants to resume
-            board = activeUserForResume.savedGame.board;
-            solution = activeUserForResume.savedGame.solution;
-            elapsedTimeInSeconds = activeUserForResume.savedGame.elapsedTimeInSeconds;
-            currentDifficultySetting = activeUserForResume.savedGame.difficulty;
-            // currentGameUsername is already set by prior logic
+    if (activeUserForResumeLogic && activeUserForResumeLogic.savedGamesList && activeUserForResumeLogic.savedGamesList.length > 0) {
+        let gameToResume = null;
 
-            // Ensure board and timer are visible
+        if (gameIdToLoad) { // A specific game ID was passed
+            gameToResume = activeUserForResumeLogic.savedGamesList.find(game => game.id === gameIdToLoad);
+            if (gameToResume) {
+                // console.log(`Loading specified game: ${gameToResume.id}`);
+            } else {
+                // console.warn(`Specified game ID ${gameIdToLoad} not found in user's saved games.`);
+            }
+        } else if (activeUserForResumeLogic.savedGamesList.length === 1) {
+            // Only one saved game exists, prompt for that one
+            const singleGame = activeUserForResumeLogic.savedGamesList[0];
+            if (confirm(`${activeUserForResumeLogic.name}, you have an unfinished game (Difficulty: ${singleGame.difficulty}, Saved: ${new Date(singleGame.savedAt).toLocaleString()}). Would you like to resume it?`)) {
+                gameToResume = singleGame;
+            } else {
+                // User declined to resume the single saved game. Clear it.
+                // console.log("User declined to resume the single saved game. Clearing it.");
+                activeUserForResumeLogic.savedGamesList = []; // Clear the list for this user
+                // Update localStorage:
+                const allUsers = getUsers();
+                const userIndex = allUsers.findIndex(u => u.name === activeUserForResumeLogic.name);
+                if (userIndex > -1) {
+                    allUsers[userIndex].savedGamesList = []; // Ensure it's empty
+                    allUsers[userIndex].savedGame = null; // Also clear old field if it somehow exists
+                    localStorage.setItem('sudokuUsers', JSON.stringify(allUsers));
+                }
+            }
+        }
+        // If gameIdToLoad was set but gameToResume is still null (not found), or
+        // if there are multiple games but no gameIdToLoad was specified,
+        // gameToResume will be null. A new game will start.
+
+        if (gameToResume) {
+            board = gameToResume.board;
+            solution = gameToResume.solution;
+            elapsedTimeInSeconds = gameToResume.elapsedTimeInSeconds;
+            currentDifficultySetting = gameToResume.difficulty;
+            activeGameId = gameToResume.id; // CRITICAL: Set activeGameId
+            // currentGameUsername is already set
+
             if (gameBoardElement) gameBoardElement.style.display = 'grid';
             if (timerDisplayElement) timerDisplayElement.style.display = 'block';
 
-            renderBoard(); // Render the loaded board
-            updateTimerDisplay(); // Update display before interval starts for resumed time
-            timerInterval = setInterval(incrementTimer, 1000); // Resume timer by starting the interval
-            enableAllCells(); // Make sure user-input cells are interactive
+            renderBoard();
+            updateTimerDisplay(); // Display correct time first
+            timerInterval = setInterval(incrementTimer, 1000); // Then start interval
+            enableAllCells();
 
-            resumeGameAccepted = true;
-            displayMessage(`Game resumed for ${currentGameUsername}. Difficulty: ${currentDifficultySetting}.`, "info");
-
-            // Start autosave for the resumed game
             if (window.autoSaveInterval) clearInterval(window.autoSaveInterval);
             window.autoSaveInterval = setInterval(saveCurrentGame, 5000);
 
-        } else {
-            // User declined to resume
-            // Clear the saved game for this user
-            const allUsersForClear = getUsers();
-            const userToUpdate = allUsersForClear.find(u => u.name === activeUserForResume.name);
-            if (userToUpdate) {
-                userToUpdate.savedGame = null;
-                localStorage.setItem('sudokuUsers', JSON.stringify(allUsersForClear));
-            }
-            // Proceed to setup a new game (will happen if resumeGameAccepted is false)
+            gameSuccessfullyResumed = true;
+            displayMessage(`Game (ID: ${activeGameId.slice(-6)}) resumed for ${currentGameUsername}. Difficulty: ${currentDifficultySetting}.`, "info");
         }
     }
 
-    if (!resumeGameAccepted) {
-        // No saved game, or user declined to resume, or activeUserObject was null
-        setupNewGame(); // This sets up a fresh game if no game was resumed.
+    if (!gameSuccessfullyResumed) {
+        // No game explicitly loaded/resumed, or user declined single game, or multiple games exist but none specified.
+        setupNewGame(); // This sets up a fresh game and a new activeGameId.
     }
 
     // Event listener for the New Game button (still useful for starting another new game)
@@ -225,6 +270,7 @@ function setupNewGame() {
 
     // For a brand new game, reset timer and display message.
     elapsedTimeInSeconds = 0; // Explicitly reset for a new game
+    activeGameId = Date.now().toString(); // Generate a new ID for this game session
     displayMessage(`Playing as: ${currentGameUsername} | Difficulty: ${currentDifficultySetting}. Good luck!`, "info");
 
     const puzzleAndSolution = generateSudokuPuzzle(); // Uses currentDifficultySetting
@@ -432,34 +478,47 @@ function updateTimerDisplay() {
 // Cookie Helper Functions (setCookie, getCookie) are REMOVED.
 
 function saveCurrentGame() {
-    if (!currentGameUsername || typeof board === 'undefined' || board.length === 0) {
-        // Not in an active game or board not initialized
-        // console.log("No active game to save or board not ready.");
+    if (!currentGameUsername || typeof board === 'undefined' || board.length === 0 || !activeGameId) {
+        // console.log("No active game session to save or board not ready.");
         return;
     }
 
-    const usersJSON = localStorage.getItem('sudokuUsers');
-    let users = usersJSON ? JSON.parse(usersJSON) : [];
-    // Ensure users are mapped with savedGame, though welcome.js should handle this on load for other parts.
-    // For robustness here, ensure the mapping if direct parsing is done.
-    users = Array.isArray(users) ? users.map(user => ({
-        ...user,
-        gameHistory: Array.isArray(user.gameHistory) ? user.gameHistory : [],
-        savedGame: user.savedGame || null
-    })) : [];
-
+    const users = getUsers(); // Uses the updated getUsers from script.js
     const userIndex = users.findIndex(user => user.name === currentGameUsername);
 
     if (userIndex > -1) {
+        // Ensure savedGamesList exists (it should due to getUsers mapping)
+        if (!users[userIndex].savedGamesList) {
+            users[userIndex].savedGamesList = [];
+        }
+
+        const gameIndex = users[userIndex].savedGamesList.findIndex(game => game.id === activeGameId);
+        const now = new Date().toISOString();
         const gameState = {
-            board: board, // Current state of the board (with user inputs)
-            solution: solution, // The full solution for validation
+            id: activeGameId,
+            board: board,
+            solution: solution,
             elapsedTimeInSeconds: elapsedTimeInSeconds,
-            difficulty: currentDifficultySetting
+            difficulty: currentDifficultySetting,
+            savedAt: now
         };
-        users[userIndex].savedGame = gameState;
+
+        if (gameIndex > -1) {
+            // Update existing game in the list
+            users[userIndex].savedGamesList[gameIndex] = gameState;
+        } else {
+            // Add new game to the list
+            users[userIndex].savedGamesList.push(gameState);
+        }
+
+        // Optional: Limit the number of saved games (e.g., to 5)
+        // if (users[userIndex].savedGamesList.length > 5) {
+        //     users[userIndex].savedGamesList.sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt)); // Keep newest
+        //     users[userIndex].savedGamesList = users[userIndex].savedGamesList.slice(0, 5);
+        // }
+
         localStorage.setItem('sudokuUsers', JSON.stringify(users));
-        // console.log(`Game saved for ${currentGameUsername}`);
+        // console.log(`Game session ${activeGameId} saved for ${currentGameUsername}`);
     } else {
         // console.warn(`User ${currentGameUsername} not found. Cannot save game state.`);
     }
@@ -548,12 +607,16 @@ function checkWinCondition() {
             // Update lastDifficulty
             allUsersForStat[userIndex].lastDifficulty = currentDifficultySetting;
 
-            // Clear the saved game for the current user after win
-            if (allUsersForStat[userIndex].savedGame) {
-                allUsersForStat[userIndex].savedGame = null;
-                // console.log(`Saved game cleared for ${activeUsernameForStat} after win.`);
+            // Remove the just-completed game from savedGamesList
+            if (activeGameId && allUsersForStat[userIndex].savedGamesList) {
+                allUsersForStat[userIndex].savedGamesList = allUsersForStat[userIndex].savedGamesList.filter(
+                    game => game.id !== activeGameId
+                );
+                // console.log(`Game session ${activeGameId} removed from saved list after winning.`);
             }
+
             localStorage.setItem('sudokuUsers', JSON.stringify(allUsersForStat));
+            activeGameId = null; // Current game session is finished.
         } else {
             console.warn(`Could not find user '${activeUsernameForStat}' to update game history stat.`);
         }

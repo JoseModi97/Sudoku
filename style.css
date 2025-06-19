@@ -390,6 +390,56 @@ body {
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
+/* Saved Games List Styles */
+#saved-games-list li {
+    background-color: #f8f9fa;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#saved-games-list li .game-details {
+    flex-grow: 1;
+    margin-right: 10px; /* Space before buttons */
+    font-size: 0.9em;
+    color: #495057;
+}
+#saved-games-list li .game-details strong {
+    color: #343a40;
+}
+
+#saved-games-list li button {
+    padding: 5px 10px;
+    font-size: 0.85em;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    margin-left: 5px;
+}
+
+#saved-games-list li button.resume-game-btn {
+    color: #fff;
+    background-color: #28a745; /* Green for resume (Success Green) */
+    border: 1px solid #218838;
+}
+#saved-games-list li button.resume-game-btn:hover {
+    background-color: #218838;
+}
+
+#saved-games-list li button.delete-game-btn {
+    color: #fff;
+    background-color: #dc3545; /* Red for delete (Error Red) */
+    border: 1px solid #c82333;
+}
+#saved-games-list li button.delete-game-btn:hover {
+    background-color: #c82333;
+}
+
 /* Pause/Resume Button Styles */
 #pause-game-btn,
 #resume-game-btn {
