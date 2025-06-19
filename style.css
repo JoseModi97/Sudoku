@@ -9,7 +9,7 @@ body {
     justify-content: center;
     min-height: 100vh;
     margin: 0;
-    background-color: #FFDAB9;
+    background-color: #f0f0f0;
 }
 
 /* Game Board Styling */
@@ -17,7 +17,7 @@ body {
     display: none; /* Initially hidden, JS will set to 'grid' */
     grid-template-columns: repeat(9, 40px);
     grid-template-rows: repeat(9, 40px);
-    border: 3px solid #D2691E;
+    border: 3px solid #333;
     margin-bottom: 15px; /* Reduced margin-bottom */
 }
 
@@ -27,7 +27,7 @@ body {
     height: 40px;
     text-align: center;
     font-size: 20px;
-    border: 1px solid #DCDCDC;
+    border: 1px solid #ccc;
     box-sizing: border-box; /* Ensures padding and border are included in the element's total width and height */
     outline: none;
 }
@@ -35,12 +35,12 @@ body {
 /* Thicker borders for 3x3 subgrids */
 #game-board input:nth-child(3n) {
     border-right-width: 3px;
-    border-right-color: #D2691E;
+    border-right-color: #333;
 }
 
 #game-board input:nth-child(9n) {
      border-right-width: 1px; /* Reset right border for the last cell in a row */
-     border-right-color: #D2691E;
+     border-right-color: #ccc;
 }
 
 
@@ -50,30 +50,35 @@ body {
 #game-board input:nth-child(n+19):nth-child(-n+27),
 #game-board input:nth-child(n+46):nth-child(-n+54) {
     border-bottom-width: 3px;
-    border-bottom-color: #D2691E;
+    border-bottom-color: #333;
 }
 /* Correct the right border for the last cell in the 3x3 subgrids */
 #game-board input:nth-child(9n-6), /* 3rd cell in each row */
 #game-board input:nth-child(9n-3) { /* 6th cell in each row */
      border-right-width: 3px;
-     border-right-color: #D2691E;
+     border-right-color: #333;
 }
 
 
 /* Input Highlighting Classes */
-.correct-input {
-    color: #5CB85C;
-}
-
-.incorrect-input {
-    color: #D9534F;
-}
+/* Old .correct-input and .incorrect-input rules removed. */
 
 .prefilled-cell {
-    background-color: #FFF8DC;
+    background-color: #e0e0e0;
     font-weight: bold;
-    color: #8B4513;
     /* read-only attribute will be set via JavaScript */
+}
+
+#game-board input.incorrect-input {
+    color: red; /* Standard red text */
+    background-color: #fff0f0; /* A very light pink/red background to further highlight error */
+    font-weight: bold; /* Make the text bolder */
+}
+
+#game-board input.correct-input {
+    color: green;
+    background-color: #f0fff0; /* Optional: very light green background */
+    font-weight: bold;
 }
 
 /* Timer Styling */
@@ -81,7 +86,7 @@ body {
     display: none; /* Initially hidden, JS will set to 'block' or appropriate */
     font-size: 1.8em; /* Reduced font-size */
     margin-bottom: 15px; /* Reduced margin-bottom */
-    color: #D2691E;
+    color: #333;
     /* margin-top is handled in a later rule, will be set to 5px */
 }
 
@@ -90,7 +95,7 @@ body {
     padding: 8px 18px; /* Reduced padding */
     font-size: 0.9em; /* Reduced font-size */
     color: #fff; /* White text */
-    background-color: #FFA07A; /* Professional green */
+    background-color: #28a745; /* Professional green */
     border: none; /* Ensure no border */
     border-radius: 6px; /* Adjusted border-radius */
     cursor: pointer;
@@ -100,7 +105,7 @@ body {
 }
 
 #new-game-btn:hover {
-    background-color: #FF8C69; /* Lighten background-color */
+    background-color: #218838; /* Lighten background-color */
     transform: translateY(-1px); /* Slight lift */
     box-shadow: 0 3px 6px rgba(0,0,0,0.15); /* Slightly increase box-shadow */
 }
@@ -121,9 +126,9 @@ body {
 
 /* Specific message types (optional for now, but good to have) */
 .message-error {
-    color: #A94442; /* Clear red text */
-    background-color: #F2DEDE; /* Light red background */
-    border: 1px solid #EBCCCC; /* Red border */
+    color: #721c24; /* Clear red text */
+    background-color: #f8d7da; /* Light red background */
+    border: 1px solid #f5c6cb; /* Red border */
     padding: 8px 12px; /* Reduced padding */
     border-radius: 6px; /* Consistent border-radius */
     margin-top: 10px; /* Reduced margin top */
@@ -132,9 +137,9 @@ body {
 }
 
 .message-success {
-    color: #3C763D; /* Clear green text */
-    background-color: #DFF0D8; /* Light green background */
-    border: 1px solid #D6E9C6; /* Green border */
+    color: #155724; /* Clear green text */
+    background-color: #d4edda; /* Light green background */
+    border: 1px solid #c3e6cb; /* Green border */
     padding: 8px 12px; /* Reduced padding */
     border-radius: 6px; /* Consistent border-radius */
     margin-top: 10px; /* Reduced margin top */
@@ -155,14 +160,14 @@ body {
 #difficulty-controls h3 {
     margin: 0 0 10px 0; /* Reduced margin-bottom */
     font-size: 1em; /* Reduced font-size */
-    color: #8B4513; /* Consistent color */
+    color: #34495e; /* Consistent color */
     font-weight: 600; /* Consistent font-weight */
 }
 
 #difficulty-controls label {
     margin-right: 10px; /* Reduced margin-right */
     font-size: 1em; /* Maintained font-size for readability */
-    color: #8B4513;
+    color: #333;
     cursor: pointer; /* Ensured */
 }
 
@@ -180,16 +185,16 @@ body {
 /* Styles for input fields that can be shared */
 .shared-input-style {
     padding: 8px 10px; /* Reduced padding */
-    border: 1px solid #DCDCDC; /* Consistent professional border */
+    border: 1px solid #ced4da; /* Consistent professional border */
     border-radius: 6px; /* Consistent border-radius */
     font-size: 1em;
     box-sizing: border-box;
     transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out; /* Smooth transition for focus */
 }
 .shared-input-style:focus {
-    border-color: #FFA07A; /* Primary blue border on focus */
+    border-color: #007bff; /* Primary blue border on focus */
     outline: 0; /* Remove default outline */
-    box-shadow: 0 0 0 0.2rem rgba(255, 160, 122, 0.25); /* Subtle box-shadow for focus */
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25); /* Subtle box-shadow for focus */
 }
 
 
@@ -205,16 +210,15 @@ body {
     max-width: 500px;
     margin: 40px auto; /* More margin for a dedicated page */
     padding: 20px; /* Reduced padding */
-    background-color: #FFF8DC; /* White background for the container - appropriate */
+    background-color: #ffffff; /* White background for the container - appropriate */
     border-radius: 8px; /* Consistent with other elements or suitable for container */
     box-shadow: 0 6px 18px rgba(0,0,0,0.07); /* Refined, more subtle shadow */
     text-align: center;
-    color: #D2691E;
 }
 
 #welcome-container h1 {
     font-size: 2.2em; /* Reduced font size */
-    color: #D2691E; /* Softer dark color */
+    color: #343a40; /* Softer dark color */
     margin-bottom: 25px; /* Maintained margin-bottom */
 }
 
@@ -230,7 +234,7 @@ body {
 #stats-display,
 #stats-display p { /* Ensure p inside stats-display also gets styled if needed */
     font-size: 1em; /* Reduced font-size */
-    color: #8B4513; /* Consistent text color for welcome page sections */
+    color: #34495e; /* Consistent text color for welcome page sections */
     line-height: 1.6; /* Maintained line-height for readability */
 }
 
@@ -262,7 +266,7 @@ body {
 #user-select-dropdown,
 #new-username-input {
     padding: 8px 10px; /* Reduced padding */
-    border: 1px solid #DCDCDC; /* Consistent professional border */
+    border: 1px solid #ced4da; /* Consistent professional border */
     border-radius: 6px; /* Updated border-radius */
     font-size: 1em;
     box-sizing: border-box;
@@ -270,9 +274,9 @@ body {
 }
 #user-select-dropdown:focus,
 #new-username-input:focus {
-    border-color: #FFA07A; /* Primary blue border on focus */
+    border-color: #007bff; /* Primary blue border on focus */
     outline: 0; /* Remove default outline */
-    box-shadow: 0 0 0 0.2rem rgba(255, 160, 122, 0.25); /* Subtle box-shadow for focus */
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25); /* Subtle box-shadow for focus */
 }
 
 
@@ -283,7 +287,7 @@ body {
     margin-bottom: 4px; /* Reduced space between label and its control */
     font-size: 0.9em; /* Reduced font-size */
     font-weight: normal; /* Standardized font-weight */
-    color: #8B4513;
+    color: #34495e;
     text-align: left;
     width: 90%;
     max-width: 350px;
@@ -322,7 +326,7 @@ body {
 
 #games-completed-display {
     font-weight: bold;
-    color: #FFA07A; /* A vibrant color for the stat */
+    color: #16a085; /* A vibrant color for the stat */
     font-size: 1.1em; /* Reduced font size */
 }
 
@@ -330,8 +334,8 @@ body {
     display: inline-block;
     padding: 10px 20px; /* Reduced padding */
     font-size: 1em; /* Reduced font-size */
-    color: #D2691E; /* White text */
-    background-color: #FFC04D; /* Professional blue */
+    color: #fff; /* White text */
+    background-color: #007bff; /* Professional blue */
     border: none; /* Ensure no border */
     border-radius: 6px; /* Adjusted border-radius */
     cursor: pointer;
@@ -341,7 +345,7 @@ body {
 }
 
 #start-game-btn:hover {
-    background-color: #FFB347; /* Lighten background-color */
+    background-color: #0056b3; /* Lighten background-color */
     transform: translateY(-1px); /* Slight lift */
     box-shadow: 0 3px 6px rgba(0,0,0,0.15); /* Slightly increase box-shadow */
 }
@@ -356,17 +360,17 @@ body {
     margin-top: 5px; /* Reduced margin-top */
     margin-bottom: 10px; /* Reduced margin-bottom */
     padding: 8px 15px; /* Reduced padding */
-    background-color: #FFF8DC; /* Lighter gray, more subtle */
-    color: #8B4513; /* Darker text for better contrast */
+    background-color: #e9ecef; /* Lighter gray, more subtle */
+    color: #495057; /* Darker text for better contrast */
     text-decoration: none;
     border-radius: 6px; /* Consistent border-radius */
     font-size: 0.9em; /* Reduced font-size */
-    border: 1px solid #D2691E; /* Subtle border */
+    border: 1px solid #ced4da; /* Subtle border */
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 #back-to-settings-link:hover {
-    background-color: #FAF0E6; /* Slightly darker on hover */
+    background-color: #dee2e6; /* Slightly darker on hover */
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
