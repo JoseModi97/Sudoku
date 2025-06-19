@@ -13,6 +13,27 @@ let timerDisplayElement;
 let gameBoardElement;
 let newGameBtn;
 let messageArea;
+let pauseGameBtn;
+let resumeGameBtn;
+let pauseOverlay;
+let isGamePaused = false; // State variable
+
+// Minimal getUsers for script.js, ensuring savedGame property is handled
+function getUsers() {
+    const usersJSON = localStorage.getItem('sudokuUsers');
+    if (!usersJSON) return [];
+    try {
+        const users = JSON.parse(usersJSON);
+        return Array.isArray(users) ? users.map(user => ({
+            ...user,
+            gameHistory: Array.isArray(user.gameHistory) ? user.gameHistory : [],
+            savedGame: user.savedGame || null
+        })) : [];
+    } catch (error) {
+        console.error("Error parsing sudokuUsers from localStorage (script.js):", error);
+        return [];
+    }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     timerDisplayElement = document.getElementById('timer');
@@ -24,6 +45,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!gameBoardElement) console.error("Game board element not found!");
     if (!newGameBtn) console.error("New Game button not found!");
     if (!messageArea) console.error("Message area element not found!");
+
+    pauseGameBtn = document.getElementById('pause-game-btn');
+    resumeGameBtn = document.getElementById('resume-game-btn');
+    pauseOverlay = document.getElementById('pause-overlay');
+
+    if (!pauseGameBtn) console.error("Pause Game button not found!");
+    if (!resumeGameBtn) console.error("Resume Game button not found!");
+    if (!pauseOverlay) console.error("Pause overlay element not found!");
 
     // Load active user and their settings
     const activeUsername = localStorage.getItem('activeUsername');
@@ -48,7 +77,57 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Automatically start the game now that settings are loaded.
-    setupNewGame();
+    // setupNewGame(); // Original automatic call moved into resume logic
+
+    // Load and Resume Game Logic
+    let resumeGameAccepted = false;
+    // Re-fetch activeUserObject with the new getUsers that ensures savedGame structure
+    const usersForResume = getUsers();
+    const activeUserForResume = activeUsername ? usersForResume.find(user => user.name === activeUsername) : null;
+
+
+    if (activeUserForResume && activeUserForResume.savedGame) {
+        if (confirm(`${activeUserForResume.name}, you have an unfinished game. Would you like to resume it?`)) {
+            // User wants to resume
+            board = activeUserForResume.savedGame.board;
+            solution = activeUserForResume.savedGame.solution;
+            elapsedTimeInSeconds = activeUserForResume.savedGame.elapsedTimeInSeconds;
+            currentDifficultySetting = activeUserForResume.savedGame.difficulty;
+            // currentGameUsername is already set by prior logic
+
+            // Ensure board and timer are visible
+            if (gameBoardElement) gameBoardElement.style.display = 'grid';
+            if (timerDisplayElement) timerDisplayElement.style.display = 'block';
+
+            renderBoard(); // Render the loaded board
+            updateTimerDisplay(); // Update display before interval starts for resumed time
+            timerInterval = setInterval(incrementTimer, 1000); // Resume timer by starting the interval
+            enableAllCells(); // Make sure user-input cells are interactive
+
+            resumeGameAccepted = true;
+            displayMessage(`Game resumed for ${currentGameUsername}. Difficulty: ${currentDifficultySetting}.`, "info");
+
+            // Start autosave for the resumed game
+            if (window.autoSaveInterval) clearInterval(window.autoSaveInterval);
+            window.autoSaveInterval = setInterval(saveCurrentGame, 5000);
+
+        } else {
+            // User declined to resume
+            // Clear the saved game for this user
+            const allUsersForClear = getUsers();
+            const userToUpdate = allUsersForClear.find(u => u.name === activeUserForResume.name);
+            if (userToUpdate) {
+                userToUpdate.savedGame = null;
+                localStorage.setItem('sudokuUsers', JSON.stringify(allUsersForClear));
+            }
+            // Proceed to setup a new game (will happen if resumeGameAccepted is false)
+        }
+    }
+
+    if (!resumeGameAccepted) {
+        // No saved game, or user declined to resume, or activeUserObject was null
+        setupNewGame(); // This sets up a fresh game if no game was resumed.
+    }
 
     // Event listener for the New Game button (still useful for starting another new game)
     if (newGameBtn) {
@@ -70,6 +149,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // DO NOT call setupNewGame() here automatically on page load.
     // Game starts only when "New Game" button is clicked.
+
+    // Save game state when the user is about to leave the page
+    window.addEventListener('beforeunload', (event) => {
+        if (gameBoardElement && gameBoardElement.style.display === 'grid') { // Check if game is active
+             saveCurrentGame();
+        }
+    });
+
+    // Alternative/additional: save on visibility change (e.g., tab switching)
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            if (gameBoardElement && gameBoardElement.style.display === 'grid') { // Check if game is active
+                saveCurrentGame();
+            }
+        }
+    });
+
+    // Pause/Resume Event Listeners
+    if (pauseGameBtn) {
+        pauseGameBtn.addEventListener('click', handlePauseGame);
+    }
+    if (resumeGameBtn) {
+        resumeGameBtn.addEventListener('click', handleResumeGame);
+    }
 });
 
 function getCellElement(row, col) {
@@ -82,6 +185,24 @@ function setupNewGame() {
     // No need to read difficulty from radio buttons here.
 
     // clearInterval(timerInterval); // startTimer will handle this
+
+    // Clear any existing saved game for the current user, as a new one is starting.
+    // This is important if setupNewGame is called by the "New Game" button.
+    const usersOnNewGame = getUsers();
+    const currentUserIndex = usersOnNewGame.findIndex(user => user.name === currentGameUsername);
+    if (currentUserIndex > -1 && usersOnNewGame[currentUserIndex].savedGame) {
+        usersOnNewGame[currentUserIndex].savedGame = null;
+        localStorage.setItem('sudokuUsers', JSON.stringify(usersOnNewGame));
+        // console.log(`Cleared saved game for ${currentGameUsername} due to new game start.`);
+    }
+
+    // Reset pause state if a new game is started while paused
+    if (isGamePaused) {
+        isGamePaused = false;
+        if (pauseOverlay) pauseOverlay.style.display = 'none';
+        if (pauseGameBtn) pauseGameBtn.style.display = 'inline-block';
+        if (resumeGameBtn) resumeGameBtn.style.display = 'none';
+    }
 
     // Ensure board and timer are visible before starting everything
     if (gameBoardElement) {
@@ -101,15 +222,22 @@ function setupNewGame() {
     }
 
     // currentDifficulty = getSelectedDifficulty(); // Removed: Use currentDifficultySetting
+
+    // For a brand new game, reset timer and display message.
+    elapsedTimeInSeconds = 0; // Explicitly reset for a new game
+    displayMessage(`Playing as: ${currentGameUsername} | Difficulty: ${currentDifficultySetting}. Good luck!`, "info");
+
     const puzzleAndSolution = generateSudokuPuzzle(); // Uses currentDifficultySetting
     board = puzzleAndSolution.puzzle;
     solution = puzzleAndSolution.solution;
 
     renderBoard();
-    // Display a welcome/info message with current settings
-    displayMessage(`Playing as: ${currentGameUsername} | Difficulty: ${currentDifficultySetting}. Good luck!`, "info");
-    startTimer();
+    startTimer(); // This will start timer from 0 due to reset above
     enableAllCells(); // Make sure cells are enabled for a new game
+
+    // Autosave periodically
+    if (window.autoSaveInterval) clearInterval(window.autoSaveInterval);
+    window.autoSaveInterval = setInterval(saveCurrentGame, 5000); // Save every 5 seconds
 }
 
 function renderBoard() {
@@ -138,6 +266,13 @@ function handleInput(event) {
     const row = parseInt(idParts[1]);
     const col = parseInt(idParts[2]);
 
+    if (isGamePaused) {
+        // Revert any attempted change if game is paused
+        cell.value = board[row][col] !== 0 ? board[row][col].toString() : '';
+        return;
+    }
+
+    // row and col are already defined above
     let value = cell.value;
     cell.classList.remove('correct-input', 'incorrect-input');
 
@@ -260,11 +395,15 @@ function shuffle(array) {
 
 
 function startTimer() {
+    // This function is called when a new game starts (resetting time via setupNewGame)
+    // OR when a game is resumed (not resetting time here, just the interval).
     if (timerInterval) {
         clearInterval(timerInterval);
     }
-    elapsedTimeInSeconds = 0; // Reset elapsed time
-    updateTimerDisplay(); // Display 00:00 immediately
+    // If elapsedTimeInSeconds is already > 0 (from a resumed game), it won't be reset here.
+    // If it's a new game, setupNewGame explicitly resets elapsedTimeInSeconds.
+    // startTimer itself will just honor the current elapsedTimeInSeconds.
+    updateTimerDisplay(); // Display current time (could be 00:00 or resumed time)
     timerInterval = setInterval(incrementTimer, 1000);
 }
 
@@ -292,6 +431,75 @@ function updateTimerDisplay() {
 
 // Cookie Helper Functions (setCookie, getCookie) are REMOVED.
 
+function saveCurrentGame() {
+    if (!currentGameUsername || typeof board === 'undefined' || board.length === 0) {
+        // Not in an active game or board not initialized
+        // console.log("No active game to save or board not ready.");
+        return;
+    }
+
+    const usersJSON = localStorage.getItem('sudokuUsers');
+    let users = usersJSON ? JSON.parse(usersJSON) : [];
+    // Ensure users are mapped with savedGame, though welcome.js should handle this on load for other parts.
+    // For robustness here, ensure the mapping if direct parsing is done.
+    users = Array.isArray(users) ? users.map(user => ({
+        ...user,
+        gameHistory: Array.isArray(user.gameHistory) ? user.gameHistory : [],
+        savedGame: user.savedGame || null
+    })) : [];
+
+    const userIndex = users.findIndex(user => user.name === currentGameUsername);
+
+    if (userIndex > -1) {
+        const gameState = {
+            board: board, // Current state of the board (with user inputs)
+            solution: solution, // The full solution for validation
+            elapsedTimeInSeconds: elapsedTimeInSeconds,
+            difficulty: currentDifficultySetting
+        };
+        users[userIndex].savedGame = gameState;
+        localStorage.setItem('sudokuUsers', JSON.stringify(users));
+        // console.log(`Game saved for ${currentGameUsername}`);
+    } else {
+        // console.warn(`User ${currentGameUsername} not found. Cannot save game state.`);
+    }
+}
+
+function handlePauseGame() {
+    if (isGamePaused) return; // Already paused
+
+    if (timerInterval) clearInterval(timerInterval); // Stop the game timer
+    if (window.autoSaveInterval) clearInterval(window.autoSaveInterval); // Stop autosave
+    saveCurrentGame(); // Save the current state
+
+    isGamePaused = true;
+    if (pauseOverlay) pauseOverlay.style.display = 'flex'; // Show overlay
+    if (pauseGameBtn) pauseGameBtn.style.display = 'none'; // Hide Pause button
+    if (resumeGameBtn) resumeGameBtn.style.display = 'inline-block'; // Show Resume button
+
+    displayMessage("Game paused. Press Resume Game to continue.", "info");
+}
+
+function handleResumeGame() {
+    if (!isGamePaused) return; // Not paused
+
+    // Restart timer (it will continue from global elapsedTimeInSeconds)
+    if (timerInterval) clearInterval(timerInterval); // Clear just in case
+    timerInterval = setInterval(incrementTimer, 1000);
+    updateTimerDisplay(); // Update display immediately
+
+    // Restart autosave
+    if (window.autoSaveInterval) clearInterval(window.autoSaveInterval);
+    window.autoSaveInterval = setInterval(saveCurrentGame, 5000);
+
+    isGamePaused = false;
+    if (pauseOverlay) pauseOverlay.style.display = 'none'; // Hide overlay
+    if (pauseGameBtn) pauseGameBtn.style.display = 'inline-block'; // Show Pause button
+    if (resumeGameBtn) resumeGameBtn.style.display = 'none'; // Hide Resume button
+
+    clearMessage(); // Or display "Game Resumed"
+}
+
 function checkWinCondition() {
     for (let r = 0; r < 9; r++) {
         for (let c = 0; c < 9; c++) {
@@ -301,9 +509,17 @@ function checkWinCondition() {
         }
     }
     // If loop completes, all cells are filled and correct - it's a win
-    if (timerInterval) {
-        clearInterval(timerInterval);
+    if (timerInterval) clearInterval(timerInterval);
+    if (window.autoSaveInterval) clearInterval(window.autoSaveInterval); // Stop autosave
+
+    // Disable pause/resume buttons on win
+    if (pauseGameBtn) pauseGameBtn.style.display = 'none';
+    if (resumeGameBtn) resumeGameBtn.style.display = 'none';
+    isGamePaused = false; // Ensure pause state is reset
+    if (pauseOverlay && pauseOverlay.style.display !== 'none') { // Hide overlay if it was somehow visible
+        pauseOverlay.style.display = 'none';
     }
+
 
     // Increment gamesCompleted for the active user
     const activeUsernameForStat = localStorage.getItem('activeUsername'); // Re-fetch for safety, though currentGameUsername should be set
@@ -331,6 +547,12 @@ function checkWinCondition() {
 
             // Update lastDifficulty
             allUsersForStat[userIndex].lastDifficulty = currentDifficultySetting;
+
+            // Clear the saved game for the current user after win
+            if (allUsersForStat[userIndex].savedGame) {
+                allUsersForStat[userIndex].savedGame = null;
+                // console.log(`Saved game cleared for ${activeUsernameForStat} after win.`);
+            }
             localStorage.setItem('sudokuUsers', JSON.stringify(allUsersForStat));
         } else {
             console.warn(`Could not find user '${activeUsernameForStat}' to update game history stat.`);

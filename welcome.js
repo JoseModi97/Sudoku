@@ -6,8 +6,12 @@ function getUsers() {
     }
     try {
         const users = JSON.parse(usersJSON);
-        // Ensure it's an array, provide basic validation for structure if needed
-        return Array.isArray(users) ? users : [];
+        // Ensure it's an array and initialize gameHistory and savedGame if missing
+        return Array.isArray(users) ? users.map(user => ({
+            ...user,
+            gameHistory: Array.isArray(user.gameHistory) ? user.gameHistory : [],
+            savedGame: user.savedGame || null // Initialize if missing
+        })) : [];
     } catch (error) {
         console.error("Error parsing sudokuUsers from localStorage:", error);
         // Optionally, clear the corrupted data: localStorage.removeItem('sudokuUsers');

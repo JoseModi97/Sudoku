@@ -390,6 +390,49 @@ body {
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
+/* Pause/Resume Button Styles */
+#pause-game-btn,
+#resume-game-btn {
+    padding: 8px 18px;
+    font-size: 0.9em;
+    color: #fff;
+    background-color: #ffc107; /* Yellow for pause/resume actions */
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease;
+}
+
+#pause-game-btn:hover,
+#resume-game-btn:hover {
+    background-color: #e0a800; /* Darker yellow */
+    transform: translateY(-1px);
+}
+
+/* Pause Overlay Styles */
+#pause-overlay {
+    position: fixed; /* Cover the whole screen */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black */
+    color: white;
+    display: flex; /* Used to center the child p element */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure it's on top */
+    font-size: 2em;
+    text-align: center;
+}
+
+#pause-overlay p {
+    background-color: #333;
+    padding: 20px 40px;
+    border-radius: 10px;
+}
+
 /* Adjusting game page layout due to removed elements */
 /* Body already has display:flex, flex-direction:column, align-items:center.
    This should naturally keep things centered.
