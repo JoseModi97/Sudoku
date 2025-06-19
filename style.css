@@ -17,7 +17,7 @@ body {
     display: none; /* Initially hidden, JS will set to 'grid' */
     grid-template-columns: repeat(9, 40px);
     grid-template-rows: repeat(9, 40px);
-    border: 3px solid #333;
+    border: 3px solid #004085; /* Dark Primary Blue border */
     margin-bottom: 15px; /* Reduced margin-bottom */
 }
 
@@ -35,7 +35,7 @@ body {
 /* Thicker borders for 3x3 subgrids */
 #game-board input:nth-child(3n) {
     border-right-width: 3px;
-    border-right-color: #333;
+    border-right-color: #004085; /* Dark Primary Blue border */
 }
 
 #game-board input:nth-child(9n) {
@@ -50,13 +50,13 @@ body {
 #game-board input:nth-child(n+19):nth-child(-n+27),
 #game-board input:nth-child(n+46):nth-child(-n+54) {
     border-bottom-width: 3px;
-    border-bottom-color: #333;
+    border-bottom-color: #004085; /* Dark Primary Blue border */
 }
 /* Correct the right border for the last cell in the 3x3 subgrids */
 #game-board input:nth-child(9n-6), /* 3rd cell in each row */
 #game-board input:nth-child(9n-3) { /* 6th cell in each row */
      border-right-width: 3px;
-     border-right-color: #333;
+     border-right-color: #004085; /* Dark Primary Blue border */
 }
 
 
@@ -81,12 +81,17 @@ body {
     font-weight: bold;
 }
 
+/* Hover effect for empty, writable cells */
+#game-board input:not([readonly]):not(.prefilled-cell):not(.incorrect-input):not(.correct-input):hover {
+    background-color: #e6f7ff; /* Very light blue */
+}
+
 /* Timer Styling */
 #timer {
     display: none; /* Initially hidden, JS will set to 'block' or appropriate */
     font-size: 1.8em; /* Reduced font-size */
     margin-bottom: 15px; /* Reduced margin-bottom */
-    color: #333;
+    color: #17a2b8; /* Accent Teal */
     /* margin-top is handled in a later rule, will be set to 5px */
 }
 
@@ -182,6 +187,11 @@ body {
     vertical-align: middle; /* Ensured */
 }
 
+#difficulty-controls input[type="radio"]:checked + label {
+    color: #007bff; /* Primary Blue for selected option */
+    font-weight: bold;
+}
+
 /* Styles for input fields that can be shared */
 .shared-input-style {
     padding: 8px 10px; /* Reduced padding */
@@ -218,7 +228,7 @@ body {
 
 #welcome-container h1 {
     font-size: 2.2em; /* Reduced font size */
-    color: #343a40; /* Softer dark color */
+    color: #17a2b8; /* Accent Teal */
     margin-bottom: 25px; /* Maintained margin-bottom */
 }
 
@@ -301,7 +311,7 @@ body {
     /* Inline styles were: style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee;" */
     margin-top: 15px; /* Reduced from inline */
     padding-top: 10px; /* Reduced from inline */
-    border-top: 1px solid #e0e0e0; /* Slightly darker border */
+    border-top: 1px solid #bce0ff; /* Light blue border */
     margin-bottom: 10px; /* Reduced space below this section */
 }
 
@@ -323,10 +333,15 @@ body {
     vertical-align: middle; /* Ensure alignment */
 }
 
+#difficulty-controls-welcome input[type="radio"]:checked + label {
+    color: #007bff; /* Primary Blue for selected option */
+    font-weight: bold;
+}
+
 
 #games-completed-display {
     font-weight: bold;
-    color: #16a085; /* A vibrant color for the stat */
+    color: #17a2b8; /* Accent Teal for consistency */
     font-size: 1.1em; /* Reduced font size */
 }
 
@@ -361,7 +376,7 @@ body {
     margin-bottom: 10px; /* Reduced margin-bottom */
     padding: 8px 15px; /* Reduced padding */
     background-color: #e9ecef; /* Lighter gray, more subtle */
-    color: #495057; /* Darker text for better contrast */
+    color: #007bff; /* Primary Blue */
     text-decoration: none;
     border-radius: 6px; /* Consistent border-radius */
     font-size: 0.9em; /* Reduced font-size */
@@ -371,6 +386,7 @@ body {
 
 #back-to-settings-link:hover {
     background-color: #dee2e6; /* Slightly darker on hover */
+    color: #0056b3; /* Darker Primary Blue on hover */
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
