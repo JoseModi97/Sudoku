@@ -6,14 +6,42 @@ function getUsers() {
     }
     try {
         const users = JSON.parse(usersJSON);
-        // Ensure it's an array and initialize gameHistory and savedGame if missing
-        return Array.isArray(users) ? users.map(user => ({
-            ...user,
-            gameHistory: Array.isArray(user.gameHistory) ? user.gameHistory : [],
-            savedGame: user.savedGame || null // Initialize if missing
-        })) : [];
+        return Array.isArray(users) ? users.map(user => {
+            let savedGamesList = [];
+            if (Array.isArray(user.savedGamesList)) {
+                savedGamesList = user.savedGamesList;
+            }
+
+            // Migration: If old savedGame exists and savedGamesList is empty
+            if (user.savedGame && typeof user.savedGame === 'object' && Object.keys(user.savedGame).length > 0) {
+                if (savedGamesList.length === 0) { // Only migrate if list is empty
+                    const now = new Date().toISOString();
+                    savedGamesList.push({
+                        id: Date.now().toString() + "_migrated",
+                        board: user.savedGame.board,
+                        solution: user.savedGame.solution,
+                        elapsedTimeInSeconds: user.savedGame.elapsedTimeInSeconds,
+                        difficulty: user.savedGame.difficulty,
+                        savedAt: now
+                    });
+                    // console.log(`Migrated old savedGame for user ${user.name}`);
+                }
+                // Remove old savedGame property after attempting migration or if list already had items
+                delete user.savedGame;
+            }
+
+            return {
+                ...user, // Spread other user properties like name, lastDifficulty
+                gameHistory: Array.isArray(user.gameHistory) ? user.gameHistory : [],
+                savedGamesList: savedGamesList, // Ensure it's an array
+                savedGame: undefined // Ensure old field is not present
+            };
+        })
+        // Filter out the undefined 'savedGame' property explicitly after map
+        .map(user => { delete user.savedGame; return user; })
+        : [];
     } catch (error) {
-        console.error("Error parsing sudokuUsers from localStorage:", error);
+        console.error("Error parsing sudokuUsers from localStorage (welcome.js):", error);
         // Optionally, clear the corrupted data: localStorage.removeItem('sudokuUsers');
         return []; // Return empty array on error
     }
@@ -51,19 +79,19 @@ function updateOrAddUser(userObject, usersArray) {
         usersArray[existingUserIndex] = {
             ...existingUser,
             ...userObject,
-            // Ensure gameHistory is preserved or initialized
-            gameHistory: (userObject.gameHistory || existingUser.gameHistory || [])
+            gameHistory: userObject.gameHistory || existingUser.gameHistory || [],
+            savedGamesList: userObject.savedGamesList || existingUser.savedGamesList || []
         };
-        // Second check in case existingUser also didn't have it and userObject didn't provide it
-        if (!usersArray[existingUserIndex].gameHistory) {
-             usersArray[existingUserIndex].gameHistory = [];
-        }
+        delete usersArray[existingUserIndex].savedGame; // Cleanup old field
     } else {
         // Add new user
-        // Ensure gameHistory is initialized if not provided (though startGameBtn logic should handle it)
-        if (!userObject.gameHistory) {
+        if (!userObject.gameHistory) { // Ensure gameHistory from previous changes
             userObject.gameHistory = [];
         }
+        if (!userObject.savedGamesList) {
+            userObject.savedGamesList = [];
+        }
+        delete userObject.savedGame; // Ensure no old field for new user object
         usersArray.push(userObject);
     }
     return usersArray;
@@ -76,16 +104,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const difficultyRadios = document.querySelectorAll('input[name="difficulty-welcome"]'); // Corrected name
     const gamesCompletedDisplay = document.getElementById('games-completed-display');
     const startGameBtn = document.getElementById('start-game-btn');
+    const savedGamesSection = document.getElementById('saved-games-section');
+    const savedGamesUl = document.getElementById('saved-games-list');
+    const noSavedGamesMsg = document.getElementById('no-saved-games-msg');
 
     // Check if all elements are found
-    if (!userSelectDropdown || !newUsernameInput || difficultyRadios.length === 0 || !gamesCompletedDisplay || !startGameBtn) {
+    if (!userSelectDropdown || !newUsernameInput || difficultyRadios.length === 0 || !gamesCompletedDisplay || !startGameBtn || !savedGamesSection || !savedGamesUl || !noSavedGamesMsg) {
         console.error("One or more essential UI elements for welcome.js were not found. Aborting setup.");
+        // Log individual missing elements for easier debugging
         if (!userSelectDropdown) console.error("userSelectDropdown missing");
         if (!newUsernameInput) console.error("newUsernameInput missing");
         if (difficultyRadios.length === 0) console.error("difficultyRadios missing or empty");
         if (!gamesCompletedDisplay) console.error("gamesCompletedDisplay missing");
         if (!startGameBtn) console.error("startGameBtn missing");
+        if (!savedGamesSection) console.error("savedGamesSection missing");
+        if (!savedGamesUl) console.error("savedGamesUl missing");
+        if (!noSavedGamesMsg) console.error("noSavedGamesMsg missing");
         return; // Stop further execution if critical elements are missing
+    }
+
+    function formatElapsedTime(totalSeconds) { // Similar to report.js
+        if (isNaN(totalSeconds) || totalSeconds === null || totalSeconds < 0) return "N/A";
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    }
+
+    function handleResumeGame(username, gameId) {
+        localStorage.setItem('activeUsername', username); // Ensure correct user is active
+        localStorage.setItem('sudokuGameToLoad', gameId);
+        window.location.href = 'game.html';
+    }
+
+    function handleDeleteSavedGame(username, gameId) {
+        if (!confirm("Are you sure you want to delete this saved game?")) return;
+
+        let users = getUsers();
+        const userIndex = users.findIndex(u => u.name === username);
+        if (userIndex > -1) {
+            if (users[userIndex].savedGamesList) {
+                users[userIndex].savedGamesList = users[userIndex].savedGamesList.filter(game => game.id !== gameId);
+                saveUsers(users); // Save updated users array
+                displayUserSettings(username); // Refresh the displayed list
+            }
+        }
     }
 
     function populateUserDropdown() {
@@ -121,11 +183,55 @@ document.addEventListener('DOMContentLoaded', () => {
             difficultyRadios.forEach(radio => {
                 radio.checked = (radio.value === selectedUser.lastDifficulty);
             });
-        } else {
+
+            // Display saved games list
+            if (selectedUser.savedGamesList && selectedUser.savedGamesList.length > 0) {
+                savedGamesUl.innerHTML = ''; // Clear previous list
+                selectedUser.savedGamesList.sort((a,b) => new Date(b.savedAt) - new Date(a.savedAt)); // Show newest first
+
+                selectedUser.savedGamesList.forEach(game => {
+                    const li = document.createElement('li');
+                    li.setAttribute('data-game-id', game.id);
+
+                    const details = document.createElement('span');
+                    details.className = 'game-details';
+                    const savedDate = new Date(game.savedAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }); // Format date more concisely
+                    const timePlayed = formatElapsedTime(game.elapsedTimeInSeconds);
+
+                    details.innerHTML = `Difficulty: <strong>${game.difficulty}</strong>, Saved: <strong>${savedDate}</strong>, Time: <strong>${timePlayed}</strong> (ID: ...${game.id.slice(-6)})`;
+
+                    const resumeBtn = document.createElement('button');
+                    resumeBtn.className = 'resume-game-btn';
+                    resumeBtn.textContent = 'Resume';
+                    resumeBtn.onclick = () => handleResumeGame(selectedUser.name, game.id);
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-game-btn';
+                    deleteBtn.textContent = 'Delete';
+                    deleteBtn.onclick = () => handleDeleteSavedGame(selectedUser.name, game.id);
+
+                    const buttonsDiv = document.createElement('div');
+                    buttonsDiv.appendChild(resumeBtn);
+                    buttonsDiv.appendChild(deleteBtn);
+
+                    li.appendChild(details);
+                    li.appendChild(buttonsDiv);
+                    savedGamesUl.appendChild(li);
+                });
+                savedGamesSection.style.display = 'block';
+                noSavedGamesMsg.style.display = 'none';
+            } else {
+                savedGamesSection.style.display = 'none';
+                noSavedGamesMsg.style.display = 'block';
+            }
+
+        } else { // No selectedUser
             gamesCompletedDisplay.textContent = "N/A";
             difficultyRadios.forEach(radio => {
                 radio.checked = (radio.value === 'medium'); // Default to medium
             });
+            savedGamesSection.style.display = 'none';
+            noSavedGamesMsg.style.display = 'none'; // Hide if no user is selected at all
         }
     }
 
@@ -183,8 +289,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectedDifficulty = document.querySelector('input[name="difficulty-welcome"]:checked').value;
 
         if (isNewUser) {
-            // Initialize new user with gameHistory array
-            currentUserData = { name: activeUsername, gameHistory: [], lastDifficulty: selectedDifficulty };
+            // Initialize new user with gameHistory and savedGamesList arrays
+            currentUserData = { name: activeUsername, gameHistory: [], savedGamesList: [], lastDifficulty: selectedDifficulty };
             users = updateOrAddUser(currentUserData, users);
         } else { // Existing user
             if (currentUserData) {
