@@ -402,3 +402,21 @@ body {
    The body's flex properties should handle overall centering.
    The #game-board already has margin-bottom: 20px;
 */
+
+/* Links styled as secondary action buttons */
+.secondary-action-link {
+    display: inline-block;
+    padding: 8px 15px;
+    font-size: 0.9em;
+    color: #007bff; /* Primary Blue text */
+    background-color: #e9ecef; /* Light gray background */
+    border: 1px solid #ced4da; /* Subtle border */
+    border-radius: 6px; /* Consistent radius */
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+.secondary-action-link:hover {
+    background-color: #dee2e6; /* Slightly darker background */
+    color: #0056b3; /* Darker blue text */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}

@@ -43,9 +43,23 @@ function updateOrAddUser(userObject, usersArray) {
 
     if (existingUserIndex > -1) {
         // Update existing user: merge properties, new object overwrites old
-        usersArray[existingUserIndex] = { ...usersArray[existingUserIndex], ...userObject };
+        const existingUser = usersArray[existingUserIndex];
+        usersArray[existingUserIndex] = {
+            ...existingUser,
+            ...userObject,
+            // Ensure gameHistory is preserved or initialized
+            gameHistory: (userObject.gameHistory || existingUser.gameHistory || [])
+        };
+        // Second check in case existingUser also didn't have it and userObject didn't provide it
+        if (!usersArray[existingUserIndex].gameHistory) {
+             usersArray[existingUserIndex].gameHistory = [];
+        }
     } else {
         // Add new user
+        // Ensure gameHistory is initialized if not provided (though startGameBtn logic should handle it)
+        if (!userObject.gameHistory) {
+            userObject.gameHistory = [];
+        }
         usersArray.push(userObject);
     }
     return usersArray;
@@ -98,7 +112,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectedUser = findUser(username, users);
 
         if (selectedUser) {
-            gamesCompletedDisplay.textContent = (selectedUser.gamesCompleted || 0).toString();
+            // Update to derive gamesCompleted from gameHistory length
+            gamesCompletedDisplay.textContent = (selectedUser.gameHistory ? selectedUser.gameHistory.length : 0).toString();
             difficultyRadios.forEach(radio => {
                 radio.checked = (radio.value === selectedUser.lastDifficulty);
             });
@@ -164,7 +179,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectedDifficulty = document.querySelector('input[name="difficulty-welcome"]:checked').value;
 
         if (isNewUser) {
-            currentUserData = { name: activeUsername, gamesCompleted: 0, lastDifficulty: selectedDifficulty };
+            // Initialize new user with gameHistory array
+            currentUserData = { name: activeUsername, gameHistory: [], lastDifficulty: selectedDifficulty };
             users = updateOrAddUser(currentUserData, users);
         } else { // Existing user
             if (currentUserData) {

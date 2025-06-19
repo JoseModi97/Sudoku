@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Game - User Reports</title>
+    <link rel="stylesheet" href="style.css"> <!-- Link to existing style.css -->
+    <link rel="stylesheet" href="report.css"> <!-- Link to new report.css (will be created later) -->
+</head>
+<body>
+    <div id="report-container">
+        <h1>User Performance Reports</h1>
+
+        <div id="report-user-selection">
+            <label for="report-user-select">Select User:</label>
+            <select id="report-user-select">
+                <!-- Options will be populated by JavaScript -->
+            </select>
+        </div>
+
+        <div id="performance-summary" style="display: none;">
+            <h2 id="summary-username"></h2>
+            <p>Total Games Played: <span id="total-games">N/A</span></p>
+            <h3>Performance by Difficulty:</h3>
+            <div id="difficulty-stats">
+                <!-- Stats will be populated here, e.g.:
+                <div class="difficulty-block">
+                    <h4>Easy</h4>
+                    <p>Games Played: <span id="easy-games">0</span></p>
+                    <p>Average Time: <span id="easy-avg-time">N/A</span></p>
+                    <p>Fastest Time: <span id="easy-fastest-time">N/A</span></p>
+                </div>
+                -->
+            </div>
+        </div>
+
+        <div id="performance-analysis" style="display: none;">
+            <h3>Sharpness & Improvement</h3>
+            <div id="sharpness-assessment">
+                <!-- Assessment here -->
+            </div>
+            <div id="improvement-room">
+                <!-- Suggestions here -->
+            </div>
+        </div>
+
+        <div class="navigation-links" style="margin-top: 20px;">
+           <a href="index.html" id="back-to-welcome-link" class="secondary-action-link">Back to Welcome Page</a>
+        </div>
+    </div>
+
+    <script src="welcome.js"></script> <!-- For user utility functions if needed, or create specific report_utils.js -->
+    <script src="report.js"></script> <!-- Script for this page (will be created later) -->
+</body>
+</html>
