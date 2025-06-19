@@ -61,18 +61,24 @@ body {
 
 
 /* Input Highlighting Classes */
-.correct-input {
-    color: green;
-}
-
-.incorrect-input {
-    color: red;
-}
+/* Old .correct-input and .incorrect-input rules removed. */
 
 .prefilled-cell {
     background-color: #e0e0e0;
     font-weight: bold;
     /* read-only attribute will be set via JavaScript */
+}
+
+#game-board input.incorrect-input {
+    color: red; /* Standard red text */
+    background-color: #fff0f0; /* A very light pink/red background to further highlight error */
+    font-weight: bold; /* Make the text bolder */
+}
+
+#game-board input.correct-input {
+    color: green;
+    background-color: #f0fff0; /* Optional: very light green background */
+    font-weight: bold;
 }
 
 /* Timer Styling */
